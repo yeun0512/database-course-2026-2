@@ -135,9 +135,9 @@ INNER JOIN ch01_questions AS q
 ```
 
 실행 결과:
-3
-```text
 
+```text
+3
 ```
 
 ## 3-4. JOIN 상세 결과 관찰
@@ -209,7 +209,7 @@ FROM ch01_students;
 결과:
 
 ```text
-
+3
 ```
 
 ### 두 SQL의 차이를 내 말로 설명
