@@ -25,7 +25,7 @@
 ## 1-1. 실행한 SQL
 
 ```sql
-SELECT version();
+SELECT version(); 
 SELECT current_database();
 SELECT current_user;
 SELECT CURRENT_TIMESTAMP;
@@ -34,10 +34,10 @@ SELECT CURRENT_TIMESTAMP;
 ## 1-2. 실행 결과 기록
 
 ```text
-PostgreSQL 버전:
-현재 데이터베이스:
-현재 사용자:
-현재 시각:
+PostgreSQL 버전:PostgreSQL 18.6 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit
+현재 데이터베이스:postgres
+현재 사용자:postgres
+현재 시각:2026-09-08 21:26:49.578 +0900
 ```
 
 ## 1-3. 내가 확인한 내용
@@ -45,19 +45,19 @@ PostgreSQL 버전:
 1. SQL을 작성하는 프로그램과 PostgreSQL은 같은 프로그램인가요?
 
 ```text
-나의 답:
+나의 답: 아니요.
 ```
 
 2. `current_database()` 결과는 무엇을 의미하나요?
 
 ```text
-나의 답:
+나의 답: 현재 활용중인 데이터베이스.
 ```
 
 3. SQL이 실행되었다는 사실만으로 데이터 내용도 올바르다고 할 수 있나요?
 
 ```text
-나의 답:
+나의 답:아니요. 원하는 값인지 확인해야합니다. 
 ```
 
 ## 1-4. 증거 화면
@@ -78,7 +78,7 @@ assignments/chapter01/images/step01_environment.png
 
 <!-- 아래 줄의 주석을 지우고 실제 이미지 Markdown을 넣어도 됩니다. -->
 
-`여기에 STEP 1 증거 화면을 삽입하세요.`
+`<img width="1107" height="1129" alt="image" src="https://github.com/user-attachments/assets/93679b98-8eca-42c0-ae5f-0aa99e8eb1ee" />`
 
 ---
 
