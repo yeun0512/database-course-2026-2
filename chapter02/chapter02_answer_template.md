@@ -35,34 +35,34 @@ SHOW search_path;
 ## 1-2. 실행 결과 기록
 
 ```text
-PostgreSQL 버전:
-현재 데이터베이스:
-현재 사용자:
-현재 스키마:
-search_path:
+PostgreSQL 버전:PostgreSQL 18.6 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit
+현재 데이터베이스:postgres
+현재 사용자:postgres
+현재 스키마:public
+search_path:public, "$user"
 ```
 
 ## 1-3. 구조를 내 말로 설명
 
 ```text
-PostgreSQL은:
+PostgreSQL은: 데이터를 저장하고, SQL을 실행하는 데이터베이스 관리 시스템이다. 
 
-현재 접속한 데이터베이스는:
+현재 접속한 데이터베이스는: postgres이다.
 
-스키마는:
+스키마는: 데이터베이스 안에서 객체를 구분하고 관리하는 공간이다. 
 
-DBeaver 또는 psql 같은 도구는:
+DBeaver 또는 psql 같은 도구는: 사용자에게 데이터베이스의 결과를 보여주는 클라이언트이다. 
 ```
 
 ## 1-4. 계층 구조 완성
 
 ```text
 사용자
-→ ____________________
+→ DEeaver에서 SQL을 작성한다. 
 → PostgreSQL DBMS
-→ ____________________
-→ ____________________
-→ ____________________
+→ Postgres가 SQL 실행
+→ PostgresSQL이 결과 또는 오류를 반환한다. 
+→ Dbeaver가 결과를 화면에 표시한다. 
 → 행 / 열
 ```
 
@@ -77,8 +77,7 @@ assignments/chapter02/images/step01_environment.png
 ```markdown
 ![PostgreSQL 현재 위치 확인](./images/step01_environment.png)
 ```
-
-`여기에 STEP 1 핵심 증거 화면을 삽입하세요.`
+<img width="817" height="698" alt="image" src="https://github.com/user-attachments/assets/69870ea9-4072-4655-959a-fc2ed23313f4" />
 
 ---
 
