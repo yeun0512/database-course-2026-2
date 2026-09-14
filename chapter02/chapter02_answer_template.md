@@ -442,6 +442,7 @@ assignments/chapter02/images/step07_ai_review.png
 ```
 
 `여기에 AI 검토 과정의 핵심 화면을 삽입하세요.`
+<img width="997" height="1235" alt="image" src="https://github.com/user-attachments/assets/6f862e4f-58b1-4dff-8bb4-06208fd92018" />
 
 ---
 
