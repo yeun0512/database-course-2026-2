@@ -151,9 +151,9 @@ PostgreSQL 서버 안에는 여러 데이터베이스가 있을 수 있다.
 
 | 테이블 | 한 행의 의미 |
 | --- | --- |
-| `ch02_students` |  |
-| `ch02_courses` |  |
-| `ch02_enrollments` |  |
+| `ch02_students` | 학생 한 명 |
+| `ch02_courses` | 강의 한 개 |
+| `ch02_enrollments` | 강의 등록 사건 한 개 |
 
 ## 3-2. 열의 의미 확인
 
@@ -161,26 +161,26 @@ PostgreSQL 서버 안에는 여러 데이터베이스가 있을 수 있다.
 
 | 열 | 값의 의미 | 내부 식별자 / 업무 식별자 / 일반 속성 |
 | --- | --- | --- |
-| `id` |  |  |
-| `student_number` |  |  |
-| `name` |  |  |
-| `major` |  |  |
+| `id` | DB 내 학생 행 구분 식별자 | 내부 식별자 |
+| `student_number` | 학번 | 업무 식별자 |
+| `name` | 학생 이름 | 일반 속성 |
+| `major` | 전공 | 일반 속성 |
 
 ### `ch02_enrollments`
 
 | 열 | 값의 의미 | PK / FK / 일반 속성 |
 | --- | --- | --- |
-| `id` |  |  |
-| `student_id` |  |  |
-| `course_id` |  |  |
-| `status` |  |  |
+| `id` | DB 내 학생 행 구분 식별자 | students의 내부 식별자 |
+| `student_id` | 학번 | 외부 식별자 |
+| `course_id` | 강의 번호 | 외부 식별자 |
+| `status` | 등록 상태 | 내부 식별자 |
 
 ## 3-3. 입력된 행 수
 
 ```text
-students 행 수:
-courses 행 수:
-enrollments 행 수:
+students 행 수: 3
+courses 행 수: 0
+enrollments 행 수: 0
 ```
 
 ## 3-4. 내부 식별자와 업무 식별자
@@ -196,7 +196,7 @@ student_number가 필요한 이유: 외부 식별자이다. 현실 업무에서 
 ## 3-5. 숫자처럼 보이는 학번을 문자열로 저장한 이유
 
 ```text
-나의 설명:
+나의 설명: '00123' 과 같이 첫 자리에 0이 포함되는 경우가 있을 수 있다. 숫자로 저장하는 경우, 0이 생략되어 오류가 발생할 수 있기 때문에 문자열로 저장한다. 
 ```
 
 ---
