@@ -45,7 +45,7 @@ search_path:public, "$user"
 ## 1-3. 구조를 내 말로 설명
 
 ```text
-PostgreSQL은: 데이터를 저장하고, SQL을 실행하는 데이터베이스 관리 시스템이다. 
+PostgreSQL은: 데이터를 저장하고, SQL을 실행하는 데이터베이스 관리 시스템 (소프트웨어)이다. 
 
 현재 접속한 데이터베이스는: postgres이다.
 
