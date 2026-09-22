@@ -40,7 +40,7 @@ GitHub 계정 또는 별칭: yeun0512
 | Host | localhost |
 | Port | 5432 |
 | Database | PostgresSQL |
-| Username | 필요하면 마스킹 |
+| Username | Postgres |
 
 > 비밀번호는 기록하지 않습니다.
 
