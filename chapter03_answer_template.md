@@ -157,8 +157,7 @@ SHOW TimeZone;
 ```text
 assignments/chapter03/images/step03_location_check.png
 ```
-
-`여기에 현재 DB/사용자/스키마/search_path 결과 화면을 삽입하세요.`
+<img width="1015" height="465" alt="image" src="https://github.com/user-attachments/assets/ae4bcfce-7642-4f78-8c52-b9e2bc882eeb" />
 
 ---
 
@@ -173,7 +172,7 @@ SELECT current_database();
 실제 결과:
 
 ```text
-
+postgres
 ```
 
 - [ ] 결과가 `ai_database_book`이다.
