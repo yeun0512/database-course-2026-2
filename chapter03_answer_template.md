@@ -75,8 +75,8 @@ DBeaver는:클라이언트 서버로, 데이터베이스 서버에 연결하기 
 assignments/chapter03/images/step02_connection.png
 ```
 
-`<img width="952" height="635" alt="image" src="https://github.com/user-attachments/assets/05397b38-6de2-47f2-985c-d8f1ecf0bc64" />
-`
+<img width="952" height="635" alt="image" src="https://github.com/user-attachments/assets/05397b38-6de2-47f2-985c-d8f1ecf0bc64" />
+
 
 ## 2-2. 첫 SQL 실행
 
