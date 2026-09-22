@@ -21,9 +21,9 @@ API Key / Token
 LMS에서 제출자를 확인할 수 있으므로 공개 저장소의 답안 파일에 학번이나 실명을 반드시 적을 필요는 없습니다.
 
 ```text
-GitHub 계정 또는 별칭:
-과제 작성일:
-사용한 AI 도구:
+GitHub 계정 또는 별칭: yeun0512
+과제 작성일: 2026.09.22
+사용한 AI 도구: GPT
 ```
 
 ---
@@ -34,12 +34,12 @@ GitHub 계정 또는 별칭:
 
 | 항목 | 작성 내용 |
 | --- | --- |
-| 운영체제 |  |
-| PostgreSQL 버전 |  |
-| DBeaver 버전 |  |
-| Host | 비밀정보가 아니라면 기록, 아니면 `localhost`/`마스킹` |
-| Port |  |
-| Database |  |
+| 운영체제 | 윈도우 |
+| PostgreSQL 버전 | 18 |
+| DBeaver 버전 | DBeaver 26.2.0 |
+| Host | localhost |
+| Port | 5432 |
+| Database | PostgresSQL |
 | Username | 필요하면 마스킹 |
 
 > 비밀번호는 기록하지 않습니다.
@@ -47,11 +47,11 @@ GitHub 계정 또는 별칭:
 ## 1-2. PostgreSQL과 DBeaver 역할 설명
 
 ```text
-PostgreSQL은:
+PostgreSQL은: 데이터베이스이다. 
 
-DBeaver는:
+DBeaver는:클라이언트 서버로, 데이터베이스 서버에 연결하기 위해 필요하다.
 
-두 프로그램의 차이는:
+두 프로그램의 차이는: DBeaver은 쿼리를 작성하기 위한 것이고, DBeaver에 입력하면 PostgresSQL에 전달되어 실행된다. 다시 결과가 DBeaver에 표시된다. 
 ```
 
 ---
@@ -60,12 +60,12 @@ DBeaver는:
 
 ## 2-1. DBeaver 연결 결과
 
-- [ ] PostgreSQL 연결 유형 선택
-- [ ] Host 확인
-- [ ] Port 확인
-- [ ] Database 확인
-- [ ] Username 확인
-- [ ] Test Connection 성공
+- [0] PostgreSQL 연결 유형 선택
+- [0] Host 확인
+- [0] Port 확인
+- [0] Database 확인
+- [0] Username 확인
+- [0] Test Connection 성공
 
 ### 연결 성공 화면
 
@@ -75,7 +75,8 @@ DBeaver는:
 assignments/chapter03/images/step02_connection.png
 ```
 
-`여기에 연결 성공 화면을 삽입하세요.`
+`<img width="952" height="635" alt="image" src="https://github.com/user-attachments/assets/05397b38-6de2-47f2-985c-d8f1ecf0bc64" />
+`
 
 ## 2-2. 첫 SQL 실행
 
@@ -86,19 +87,19 @@ SELECT 1 + 1 AS result;
 실행 전 예상:
 
 ```text
-
+2
 ```
 
 실제 결과:
 
 ```text
-
+2
 ```
 
 이 결과가 의미하는 것:
 
 ```text
-
+1+1=2
 ```
 
 ---
@@ -121,13 +122,13 @@ SHOW TimeZone;
 
 | 확인 항목 | 실제 결과 | 내가 이해한 의미 |
 | --- | --- | --- |
-| `version()` |  |  |
-| `current_database()` |  |  |
-| `current_user` |  |  |
-| `current_schema()` |  |  |
-| `search_path` |  |  |
-| `transaction_read_only` |  |  |
-| `TimeZone` |  |  |
+| `version()` | PostgreSQL 18.6 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit | postgres의 버전 |
+| `current_database()` | postgres | 현재 사용중인 데이터베이스가 postgres임 |
+| `current_user` | postgres | 유저 이름 |
+| `current_schema()` | public | 스키마 |
+| `search_path` | public, "$user" | public의 user로 연결됨 |
+| `transaction_read_only` | off | 읽기모드 아님 |
+| `TimeZone` | Asia/Seoul | 아시아, 서울에서의 접속 |
 
 ## 3-2. 반드시 설명할 것
 
