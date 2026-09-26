@@ -11,9 +11,9 @@
 이 파일과 캡처 화면에는 실제 비밀번호, 전체 DB 접속 URL, API Key, 개인정보를 기록하지 않습니다.
 
 ```text
-GitHub 계정 또는 별칭:
-과제 작성일:
-사용한 AI 도구:
+GitHub 계정 또는 별칭:yeun0512
+과제 작성일: 2026.09.26
+사용한 AI 도구: GPT
 ```
 
 ---
@@ -32,21 +32,21 @@ SHOW transaction_read_only;
 
 | 확인 항목 | 실제 결과 | 의미 |
 | --- | --- | --- |
-| current_database() |  |  |
-| current_user |  |  |
-| current_schema() |  |  |
-| search_path |  |  |
-| transaction_read_only |  |  |
+| current_database() | ai_database_book | 현재 DB가 ai_database_book이다. |
+| current_user | postgres | 유저 이름이 postgres이다. |
+| current_schema() | public | public 스키마이다. |
+| search_path | public, "$user" | public, user의 경로이다. |
+| transaction_read_only | off | 수정 가능 모드이다. |
 
-- [ ] 현재 DB가 `ai_database_book`이다.
-- [ ] 변경 가능한 연결인지 확인했다.
-- [ ] 실행할 SQL 범위를 확인했다.
-- [ ] Auto-commit 상태를 확인했다.
+- [0] 현재 DB가 `ai_database_book`이다.
+- [0] 변경 가능한 연결인지 확인했다.
+- [0] 실행할 SQL 범위를 확인했다.
+- [0] Auto-commit 상태를 확인했다.
 
 ### 변경 SQL을 실행하기 전에 현재 DB와 실행 범위를 확인해야 하는 이유
 
 ```text
-
+원하지 않았던 데이터가 변경되어 의도와 다른 결괏값이 도출될 수 있다. 
 ```
 
 ---
@@ -56,13 +56,13 @@ SHOW transaction_read_only;
 ## 2-1. 실행 전 예상
 
 ```text
-테이블 이름:
-한 행의 의미:
-예상 행 수:
-기본키:
-필수 열:
-중복을 막는 열:
-자동 생성 열:
+테이블 이름: public.students
+한 행의 의미: 학생 한 명
+예상 행 수: 학생 수와 동일
+기본키: id
+필수 열: id, email, name, major, grade
+중복을 막는 열: 학생 id
+자동 생성 열: timestamp
 ```
 
 ## 2-2. 실행 파일
@@ -74,26 +74,26 @@ code/chapter04/01_create_students.sql
 ## 2-3. 실행 후 확인
 
 ```text
-테이블 생성 성공 여부:
-실제 행 수:
-DBeaver에서 확인한 위치:
+테이블 생성 성공 여부: 네
+실제 행 수: 16,527
+DBeaver에서 확인한 위치: Schemas_public_Tables
 ```
 
 ### 각 열의 역할
 
 | 열 | 타입 | NULL 가능? | 역할 |
 | --- | --- | --- | --- |
-| id |  |  |  |
-| name |  |  |  |
-| email |  |  |  |
-| major |  |  |  |
-| grade |  |  |  |
-| created_at |  |  |  |
+| id | integer | no | 내부 식별자 |
+| name | character varying | no | 필수 문자열 |
+| email | character varying | no | 필수, 중복 제한 |
+| major | character varying | yes | 전공 정보 |
+| grade | integer | yes | 등급 정보 |
+| created_at | timestamp with time zone | no | 생성 시각 |
 
 ### `id`를 학번이나 학생 수로 해석하면 안 되는 이유
 
 ```text
-
+id는 데이터베이스 내에서 학생을 식별하도록 만든 고유한 숫자 입력 값이므로 학번과 상이할 수 있다. 이는 행을 구분하기 위한 내부 식별자일 뿐이다. 
 ```
 
 ### 증거 화면
@@ -104,7 +104,8 @@ DBeaver에서 확인한 위치:
 assignments/chapter04/images/step02_table.png
 ```
 
-`여기에 테이블 구조 확인 화면을 삽입하세요.`
+<img width="943" height="868" alt="image" src="https://github.com/user-attachments/assets/677c03bd-b369-4ae8-8fcb-cacab85b2470" />
+
 
 ---
 
