@@ -75,7 +75,7 @@ code/chapter04/01_create_students.sql
 
 ```text
 테이블 생성 성공 여부: 네
-실제 행 수: 16,527
+실제 행 수: 0
 DBeaver에서 확인한 위치: Schemas_public_Tables
 ```
 
@@ -87,7 +87,7 @@ DBeaver에서 확인한 위치: Schemas_public_Tables
 | name | character varying | no | 필수 문자열 |
 | email | character varying | no | 필수, 중복 제한 |
 | major | character varying | yes | 전공 정보 |
-| grade | integer | yes | 등급 정보 |
+| grade | integer | yes | 학 정보 |
 | created_at | timestamp with time zone | no | 생성 시각 |
 
 ### `id`를 학번이나 학생 수로 해석하면 안 되는 이유
@@ -114,9 +114,9 @@ assignments/chapter04/images/step02_table.png
 ## 3-1. 실행 전 예상
 
 ```text
-현재 행 수:
-실행 후 예상 행 수:
-예상되는 NULL 포함 학생:
+현재 행 수: 0
+실행 후 예상 행 수: 6
+예상되는 NULL 포함 학생: 6
 ```
 
 ## 3-2. 실행 파일
@@ -128,24 +128,24 @@ code/chapter04/02_insert_students.sql
 ## 3-3. 실제 결과
 
 ```text
-실제 행 수:
-이준호 grade:
-박서연 존재 여부:
-윤서진 major:
-윤서진 grade:
+실제 행 수:6
+이준호 grade:3
+박서연 존재 여부:네
+윤서진 major:NULL
+윤서진 grade:NULL
 ```
 
 ### 예상과 실제 비교
 
 ```text
-예상과 실제가 일치했는가:
-다르다면 이유:
+예상과 실제가 일치했는가:아니요. 
+다르다면 이유:처음 예상 시에는 6행의 윤서진 이외 학생들의 major 와 grade 정보가 모두 존재하는지에 대한 확신을 얻을 수 없었기 때문입니다. 
 ```
 
 ### `created_at` 값이 여러 행에서 같을 수 있는 이유
 
 ```text
-
+생성된 시각이 같기 때문이다. 
 ```
 
 ---
@@ -156,55 +156,66 @@ code/chapter04/02_insert_students.sql
 
 | 번호 | 조회 문제 | 예상 행 수 | 실제 행 수 | 일치? | 다르면 이유 |
 | ---: | --- | ---: | ---: | --- | --- |
-| 1 | 전체 학생 |  |  |  |  |
-| 2 | 이름·이메일만 조회 |  |  |  |  |
-| 3 | 특정 전공 |  |  |  |  |
-| 4 | 특정 학년 이상 |  |  |  |  |
-| 5 | 두 전공 중 하나 |  |  |  |  |
-| 6 | `grade IS NULL` |  |  |  |  |
-| 7 | 전공 `DISTINCT` |  |  |  |  |
-| 8 | 정렬 후 상위 3명 |  |  |  |  |
+| 1 | 전체 학생 | 전체 학생 조회 | 6 | 6 | 일치 |
+| 2 | 이름·이메일만 조회 | 전체 이름, 이메일만 조회 | 6 | 6 | 일치 |
+| 3 | 특정 전공 | 컴퓨터 공학 전공 조회 | 2 | 5 | 불일치 | NULL이 아닌 행의 수를 모두 세고, 체크로 조회한 항목에 해당하는 행을 표시함.
+| 4 | 특정 학년 이상 | 3학년 이상 조회 | 2 | 5 | 불일치 | NULL이 아닌 행의 수를 모두 세고, 체크로 조회한 항목에 해당하는 행을 표시함.
+| 5 | 두 전공 중 하나 | 경영학, 컴퓨터 공학 전공 중 하나 조회 | 3 | 5 | 불일치 | NULL이 아닌 행의 수를 모두 세고, 체크로 조회한 항목에 해당하는 행을 표시함.
+| 6 | `grade IS NULL` | 전공 입력되지 않은 학생 조회 | 1 | 6 | 학생 전체 행을 표현하고, 체크로 grade 가 NULL인 학생의 행을 표시함. |
+| 7 | 전공 `DISTINCT` | 전공이 'DISTINCT'인 학생 조회 | 0 | 5 | 불일치 | 전공이 DISTINCT인 학생은 없기 때문에 조회되지 않을 것이라고 생각하였는데, 전공 항목의 데이터가 있는 경우, 조회되었다. 
+| 8 | 정렬 후 상위 3명 | 정렬 후 상위 3명 조회 | 3 | 3 | 일치 |
 
 ## 4-1. 내가 직접 작성한 SQL 2개
 
 ```sql
 -- SQL 1
+SELECT major = '컴퓨터공학'
+FROM public.students
+ORDER BY id;
 
+SELECT COUNT(major = '컴퓨터공학') AS student_count
+FROM public.students;
 ```
 
 ```text
-이 SQL의 한 행 의미:
-예상 행 수:
-실제 행 수:
+이 SQL의 한 행 의미: 전공을 가지는 학생 한 명
+예상 행 수: 컴퓨터 공학 전공의 학생 한 명을 예상하여, 2명일 것이라고 예상하였다. 
+실제 행 수: 전공을 가지는 학생 전체의 행을 보여주어, 5명이 결과로 도출되었다. 
 ```
 
 ```sql
 -- SQL 2
+SELECT grade >= 3
+FROM public.students
+ORDER BY id;
+
+SELECT COUNT(grade >= 3) AS student_count
+FROM public.students;
 
 ```
 
 ```text
-이 SQL의 한 행 의미:
-예상 행 수:
-실제 행 수:
+이 SQL의 한 행 의미: 학생 한 명
+예상 행 수: 2: 3학년 이상의 학생 2명이 보일 것으로 예상하였다. 
+실제 행 수: 5: 학년 정보가 있는 학생 전체의 행을 보여주어, 5명이 결과로 도출되었다. 
 ```
 
 ## 4-2. `= NULL` 대신 `IS NULL`을 사용하는 이유
 
 ```text
-
+= NULL을 활용하는 경우, NULL 인 행이 6개인 것으로 표시된다. 
 ```
 
 ## 4-3. `ORDER BY` 없이 결과 순서를 믿으면 안 되는 이유
 
 ```text
-
+기준이 마련되어 있어야하기 때문이다. 어떠한 기준으로 정렬된 값인지를 알 수 없다. 
 ```
 
 ## 4-4. `DISTINCT`가 원본 데이터를 삭제하는 기능인가요?
 
 ```text
-
+아니요. DISTINCT 는 조회 결과에서 중복된 결과를 제거하는 기능입니다. 
 ```
 
 ### 증거 화면
@@ -215,7 +226,8 @@ code/chapter04/02_insert_students.sql
 assignments/chapter04/images/step04_select.png
 ```
 
-`여기에 SELECT 핵심 결과 화면을 삽입하세요.`
+<img width="450" height="440" alt="image" src="https://github.com/user-attachments/assets/8f7ac2b3-cb1e-427b-ab0f-96dd73b65295" />
+
 
 ---
 
@@ -227,39 +239,43 @@ assignments/chapter04/images/step04_select.png
 
 ```text
 학생 A
-이름:
-이메일:
-전공:
-학년:
+이름: 김김김
+이메일: kimkim@example.com
+전공: 경영학
+학년: 2
 
 학생 B
-이름:
-이메일:
-전공:
-학년 또는 NULL:
+이름: 이이이
+이메일: leelee@example.com
+전공: 컴퓨터 공학
+학년 또는 NULL: 2
 
-현재 행 수:
-추가 후 예상 행 수:
+현재 행 수: 6
+추가 후 예상 행 수: 8
 ```
 
 ## 5-2. 내가 실행한 INSERT
 
 ```sql
-
+INSERT INTO public.students (name, email, major, grade)
+VALUES
+    ('김김김', 'kimkim@example.com', '경영학', 2),
+    ('이이이', 'leelee@example.com', '컴퓨터공학', 2)
+RETURNING id, name, major, grade;
 ```
 
 ## 5-3. 실제 결과
 
 ```text
-RETURNING 또는 확인 SELECT 결과:
-실제 전체 행 수:
-예상과 일치 여부:
+RETURNING 또는 확인 SELECT 결과: 학생 8명 결과가 나왔다. 
+실제 전체 행 수: 8
+예상과 일치 여부: 일치
 ```
 
 ### 내가 일부 값을 NULL로 둔 이유 또는 NULL을 사용하지 않은 이유
 
 ```text
-
+입력 가능한 정보는 최대한 많이 알고 있는 것으로 가정하고 싶었기 때문이다. 
 ```
 
 ---
@@ -271,36 +287,43 @@ RETURNING 또는 확인 SELECT 결과:
 ## 6-1. 먼저 대상 확인 SELECT
 
 ```sql
-
+SELECT *
+FROM public.students
+WHERE email = 'kimkim@example.com';
 ```
 
 ```text
-예상 대상 행 수:
-실제 대상 행 수:
+예상 대상 행 수: 1
+실제 대상 행 수: 1
 ```
 
 ## 6-2. UPDATE
 
 ```sql
-
+UPDATE public.students
+SET grade = 3
+WHERE email = 'kimkim@example.com'
+returning id, name, email, grade;
 ```
 
 ```text
-예상 영향 행 수:
-실제 영향 행 수:
-RETURNING 결과:
+예상 영향 행 수: 1
+실제 영향 행 수: 1
+RETURNING 결과: 1명 (김김김) 의 행만 조회되었다. 
 ```
 
 ## 6-3. UPDATE 후 재조회
 
 ```sql
-
+SELECT id, name, email, major, grade, created_at
+FROM public.students
+ORDER BY id ASC;
 ```
 
 ### `WHERE` 없는 UPDATE를 실행하면 위험한 이유
 
 ```text
-
+변경하려고 하지 않았던 데이터까지 변경되어버릴 우려가 있기 때문이다.
 ```
 
 ### 증거 화면
@@ -311,7 +334,8 @@ RETURNING 결과:
 assignments/chapter04/images/step06_update.png
 ```
 
-`여기에 UPDATE 전/후 결과 화면을 삽입하세요.`
+<img width="1002" height="593" alt="image" src="https://github.com/user-attachments/assets/6b396c0d-10bc-4dc9-90d6-c009f00616a5" />
+
 
 ---
 
