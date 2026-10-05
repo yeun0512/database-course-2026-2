@@ -346,42 +346,47 @@ assignments/chapter04/images/step06_update.png
 ## 7-1. 삭제 전 확인
 
 ```sql
-
+SELECT *
+FROM public.students
+WHERE email = 'kimkim@example.com';
 ```
 
 ```text
-예상 대상 행 수:
-실제 대상 행 수:
+예상 대상 행 수: 1
+실제 대상 행 수: 1
 ```
 
 ## 7-2. DELETE
 
 ```sql
-
+DELETE FROM public.students
+WHERE email = 'kimkim@example.com'
+RETURNING id, name, email;
 ```
 
 ```text
-예상 영향 행 수:
-실제 영향 행 수:
-RETURNING 결과:
+예상 영향 행 수:1
+실제 영향 행 수:1
+RETURNING 결과: 7, 김김김, kimkim@example.com인 행이 보였다. 
 ```
 
 ## 7-3. 삭제 후 재조회
 
 ```sql
-
+SELECT id, name, email, major, grade, created_at
+FROM public.students
+ORDER BY id ASC;
 ```
 
 ```text
-삭제 후 같은 조건의 SELECT 결과 행 수:
+삭제 후 같은 조건의 SELECT 결과 행 수: 7개 
 ```
 
 ### `DELETE` 성공 메시지만 보고 끝내지 않고 다시 SELECT해야 하는 이유
 
 ```text
-
+실제로 삭제된 데이터의 행이 제대로 삭제된 것인지, 다른 행에는 영향이 없는지 확인해야한다. 
 ```
-
 ---
 
 # 8. 본문 기준 UPDATE·DELETE 상태 검증
@@ -389,9 +394,9 @@ RETURNING 결과:
 `04_update_delete_students.sql`을 본문 시작 상태에서 실행했다면 다음을 확인합니다.
 
 ```text
-최종 학생 수:
-이준호 grade:
-박서연 존재 여부:
+최종 학생 수: 7
+이준호 grade: 3
+박서연 존재 여부: 존재한다. 
 ```
 
 본문 기준 기대 상태와 비교합니다.
@@ -405,7 +410,7 @@ RETURNING 결과:
 ### 내 실제 결과가 기준과 다르다면 원인
 
 ```text
-
+실제 기대와 다르다. 학생을 2명 추가하였고, 이후 상태에서 삭제한 학생은 한 명이었기 때문이다. 또한, 박서연과 관련된 행은 수정한 적이 없다. 
 ```
 
 ---
