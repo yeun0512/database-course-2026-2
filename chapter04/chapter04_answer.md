@@ -394,9 +394,9 @@ ORDER BY id ASC;
 `04_update_delete_students.sql`을 본문 시작 상태에서 실행했다면 다음을 확인합니다.
 
 ```text
-최종 학생 수: 7
-이준호 grade: 3
-박서연 존재 여부: 존재한다. 
+최종 학생 수: 6
+이준호 grade: 4
+박서연 존재 여부: 존재하지 않는다. 0행 
 ```
 
 본문 기준 기대 상태와 비교합니다.
@@ -410,7 +410,7 @@ ORDER BY id ASC;
 ### 내 실제 결과가 기준과 다르다면 원인
 
 ```text
-실제 기대와 다르다. 학생을 2명 추가하였고, 이후 상태에서 삭제한 학생은 한 명이었기 때문이다. 또한, 박서연과 관련된 행은 수정한 적이 없다. 
+만들어낸 학생 1명의 데이터를 삭제하지 않아서, 5명의 기대와 달랐기 때문에 계속해서 기대와 다르다는 오류가 발생하였다. 확인하였을 때, 박서연 삭제와 이준호 학년 수정은 잘 이루어졌으나, 추가했던 학생이 6행으로 남아있어서 오류가 발생하는 것을 알 수 있었다.
 ```
 
 ---
@@ -424,14 +424,20 @@ ORDER BY id ASC;
 내가 사용한 SQL:
 
 ```sql
+SELECT id, name, email
+FROM public.students
+ORDER BY id;
 
+
+INSERT INTO public.students (name, email, major, grade)
+VALUES ('중복테스트', 'minji@example.com', '테스트전공', 1);
 ```
 
 ```text
-오류 메시지 핵심 단서:
-왜 실패해야 맞는가:
-어떤 규칙이 작동했는가:
-실패 후 기존 데이터가 어떻게 유지되었는가:
+오류 메시지 핵심 단서: 고유 제약 조건 위반 
+왜 실패해야 맞는가: email은 고유하도록 제약 조건을 설정하였는데, insert로 추가한 정보의 이메일이 기존의 자료와 일치하였기 때문이다. 
+어떤 규칙이 작동했는가:email은 고유하도록 한다. 
+실패 후 기존 데이터가 어떻게 유지되었는가: 기존데이터는 변화 없이, insert가 진행되지 않았다. 
 ```
 
 ## 9-2. 이름 `NULL` 입력 `NOT NULL` 오류
@@ -439,19 +445,21 @@ ORDER BY id ASC;
 내가 사용한 SQL:
 
 ```sql
-
+INSERT INTO public.students (name, email, major, grade)
+VALUES (NULL, 'null_name_test@example.com', '테스트전공', 1);
 ```
 
 ```text
-오류 메시지 핵심 단서:
-왜 실패해야 맞는가:
-어떤 규칙이 작동했는가:
+오류 메시지 핵심 단서: not null 제약조건을 위반했습니다. 
+왜 실패해야 맞는가: name 칼럼은 null 상태일 수 없다는 제약 조건을 부여하였는데, 입력한 데이터에 이름 정보가 없기 때문이다. 
+어떤 규칙이 작동했는가:name은 null일 수 없음. 
 ```
 
 ### 실패한 INSERT 뒤 자동 생성 `id` 번호에 빈 구간이 생길 수 있어도 문제라고 단정할 수 없는 이유
 
 ```text
 
+id는 행 식별용 내부 번호일 뿐, 학생 수가 아니기 때문에 빈 구간이 생길 수 있습니다. 
 ```
 
 ### 증거 화면
@@ -462,7 +470,7 @@ ORDER BY id ASC;
 assignments/chapter04/images/step09_constraint_error.png
 ```
 
-`여기에 제약조건 오류 화면을 삽입하세요.`
+`<img width="634" height="512" alt="image" src="https://github.com/user-attachments/assets/3f515a93-32c8-426b-8375-63320a584f76" />`
 
 ---
 
@@ -475,17 +483,17 @@ code/chapter04/verify_students.sql
 ```
 
 ```text
-현재 전체 학생 수:
-NULL 개수:
-이준호 grade:
-박서연 존재 여부:
-현재 데이터 상태에서 예상과 다른 부분:
+현재 전체 학생 수:6
+NULL 개수:2개
+이준호 grade:4
+박서연 존재 여부:없음
+현재 데이터 상태에서 예상과 다른 부분:추가했던 학생 2명 중 한명에 대한 정보가 여전히 남아있다. 
 ```
 
 ### 검증 SQL을 따로 두면 좋은 이유
 
 ```text
-
+데이터 변경 없이 현재 상태가 어떤지 확인할 수 있기 때문이다. 오류가 없는 상태이더라도, 데이터가 예상과 다를 수 있는데, 이를 직접 확인할 수 있어서 좋다. 
 ```
 
 ---
@@ -497,12 +505,36 @@ NULL 개수:
 ## 11-1. 내가 작성한 SQL
 
 ```sql
+SELECT id, name, email, major
+FROM public.students
+WHERE email = 'leelee@example.com';
 
+DELETE FROM public.students
+WHERE email = 'leelee@example.com'
+RETURNING id, name, email;
 ```
 
 ## 11-2. AI에게 전달한 핵심 요청
 
 ```text
+
+나는 PostgreSQL 초보자입니다.
+아래 SQL을 바로 다시 작성하지 말고 먼저 안전성을 검토해 주세요.
+다음 순서로 답해 주세요.
+
+1. 이 SQL이 영향을 줄 것으로 예상되는 행
+2. WHERE 조건이 너무 넓거나 모호하지 않은지
+3. NULL 처리에서 주의할 점
+4. 실행 전에 같은 조건으로 확인할 SELECT
+5. 실행 후 결과를 확인할 SELECT
+6. 내가 놓친 위험이 있다면 질문 형태로 제시
+
+[SELECT id, name, email, major
+FROM public.students
+WHERE email = 'leelee@example.com';
+DELETE FROM public.students
+WHERE email = 'leelee@example.com'
+RETURNING id, name, email;]
 
 ```
 
@@ -510,20 +542,20 @@ NULL 개수:
 
 | AI 제안 | 수용 / 수정 / 거절 | 실제 검증 결과 | 나의 이유 |
 | --- | --- | --- | --- |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
+| email과 일치하는 행 삭제하려고 하는데, 고유 제약 조건 만족되어 있는 상태인지 현재 데이터베이스의 제약 조건은 별도로 확인해야 합니다. | 수용 | 실제 데이터를 확인하여 email이 일치하는 사람이 한 명 뿐임을 확인하였다. | 데이터를 수정하려는 경우, 초기 데이터를 직접 확인하는 것이 안전하기 때문이다. |
+| 이미 적어 주신 첫 번째 SELECT가 삭제 조건과 같아서 미리 확인하는 용도로 적절합니다. 실행 결과에서 대상 행의 이름과 이메일이 의도한 대상인지 확인하세요. | 수용 | 확인하였다. | 초기 데이터를 직접 확인하는 것이 안전하기 때문이다. |
+| 다른 작업이나 사용자가 동시에 같은 행을 수정할 가능성이 있나요? | 수용 | 없음을 확인하였다. | 동시 작업이 가능했다면, 데이터가 잘못 수정될 우려가 있기 때문에 검토하는 것이 필요하다고 생각하였다. |
 
 ### AI가 예상한 영향 행 수와 실제 결과가 같았나요?
 
 ```text
-
+네 
 ```
 
 ### AI 답변을 실행 전에 검토해야 하는 이유
 
 ```text
-
+AI 답변이더라도, 실제로 원하는 방식으로 데이터가 수정된 것인지, 수정 이후에는 이러한 의도가 잘 반영되도록 데이터가 변형되었는지 직접 확인해야하기 때문입니다.  
 ```
 
 ---
@@ -533,23 +565,23 @@ NULL 개수:
 Chapter 01~03에서 정한 개인 서비스에서 **테이블 하나**를 선택합니다.
 
 ```text
-서비스 이름:
-테이블 이름:
-한 행의 의미:
+서비스 이름: 도시락 서비스 회원 관리 
+테이블 이름: members
+한 행의 의미: 회원 한 명
 ```
 
 | 열 이름 | 저장할 값 | 타입 후보 | NULL 가능? | UNIQUE 후보? | 이유 |
 | --- | --- | --- | --- | --- | --- |
-|  |  |  |  |  |  |
-|  |  |  |  |  |  |
-|  |  |  |  |  |  |
-|  |  |  |  |  |  |
-|  |  |  |  |  |  |
+| id | 고유 번호 | 숫자 | no | no | 관리를 위해 부여하는 임의의 값으로, unique해야한다. |
+| name | 이름 | 문자열 | no | no | 이름은 동일한 사람이 있을 수 있기 때문이다. |
+| email | 이메일 | 문자열 | yes | yes | 이메일 정보는 개인마다 하나씩 서로 다르게 가지기 때문이다. |
+| age | 나이 | 숫자 | yes | no | 나이가 동일한 사람이 있을 수 있기 때문이다. |
+| address | 주소 | 문자열 | no | no | 하나의 주소에 여러 명이 거주하는 경우, 동일한 주소를 가질 수 있기 때문이다. |
 
 ```text
-PK 후보:
-업무 식별자 후보:
-아직 미확정인 규칙:
+PK 후보: id
+업무 식별자 후보: member
+아직 미확정인 규칙: 도시락의 종류와 관련된 테이블을 어떤 방식으로 만들고, 연결할지 확정하지 못하였다.
 ```
 
 ## 선택: CREATE TABLE 초안
@@ -557,13 +589,67 @@ PK 후보:
 > 아직 확정되지 않은 업무 규칙은 억지로 제약조건으로 만들지 않습니다.
 
 ```sql
+SELECT current_database();
+SELECT current_user;
+SELECT current_schema();
+SHOW search_path;
+
+DO $$
+BEGIN
+    IF current_database() <> 'ai_database_book' THEN
+        RAISE EXCEPTION
+            '생성 중단: 현재 데이터베이스는 %입니다. ai_database_book 연결을 선택하세요.',
+            current_database();
+    END IF;
+
+    IF to_regnamespace('public') IS NULL THEN
+        RAISE EXCEPTION
+            '생성 중단: public 스키마가 존재하지 않습니다.';
+    END IF;
+
+    IF NOT has_schema_privilege(current_user, 'public', 'USAGE') THEN
+        RAISE EXCEPTION
+            '생성 중단: 사용자 %에게 public 스키마 USAGE 권한이 없습니다.',
+            current_user;
+    END IF;
+
+    IF NOT has_schema_privilege(current_user, 'public', 'CREATE') THEN
+        RAISE EXCEPTION
+            '생성 중단: 사용자 %에게 public 스키마 CREATE 권한이 없습니다.',
+            current_user;
+    END IF;
+
+    IF current_setting('transaction_read_only')::boolean THEN
+        RAISE EXCEPTION
+            '생성 중단: 현재 연결이 읽기 전용입니다.';
+    END IF;
+END
+$$;
+
+CREATE TABLE public.students (
+    id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    age INTEGER,
+    address VARCHAR(100) UNIQE NOT NULL
+);
+
 
 ```
 
 ### AI에게 검토받은 뒤 수정한 부분
 
 ```text
+정의하신 서비스는 회원 정보를 관리하므로 테이블 이름은 students가 아니라 members가 적절합니다.
+또 주소는 여러 회원이 공유할 수 있다고 하셨으므로 UNIQUE를 두지 않아야 합니다.
 
+CREATE TABLE public.members (
+    id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    age INTEGER,
+    address VARCHAR(100) NOT NULL
+);
 ```
 
 ---
@@ -574,42 +660,42 @@ PK 후보:
 
 ```text
 1. SQL 실행 성공과 올바른 대상 선택이 다른 이유는
-   ____________________________________________________________ 이다.
+   단순한 실행의 성공은 의도한 데이터를 대상으로 했는지를 보장하는 것이 아니기 때문이다.
 
 2. UPDATE와 DELETE 전에 SELECT를 먼저 해야 하는 이유는
-   ____________________________________________________________ 이다.
+   데이터에 있어 변경을 일으키는 것이기 때문에, 영향을 미치는 범위를 분명히 하는 것이 안전하기 때문이다.
 
 3. 영향받은 행 수를 확인해야 하는 이유는
-   ____________________________________________________________ 이다.
+   원하는 데이터만 변경된 것인지, 다른 데이터에는 영향이 없는지를 직접 검토하기 위함이다.
 
 4. UNIQUE 또는 NOT NULL 오류를 '보호 장치가 정상 동작한 결과'라고 볼 수 있는 이유는
-   ____________________________________________________________ 이다.
+   초기 부여한 제약 조건을 만족하지 않은 경우, 오류로 인식하여 데이터를 수정하지 않은 결과이기 때문이다.
 
 5. AI가 SQL을 만들어 주더라도 내가 반드시 확인해야 하는 것은
-   ____________________________________________________________ 이다.
+   내가 계획한 목표 달성에 적절한 문장인지, 다른 데이터의 변형은 없는지 등 이다.
 ```
 
 ---
 
 # 14. 제출 체크리스트
 
-- [ ] `chapter04_answer.md`를 본인 저장소에 만들었다.
-- [ ] 현재 DB와 실행 환경을 확인했다.
-- [ ] `public.students`를 생성했다.
-- [ ] 샘플 6명 입력 결과를 검증했다.
-- [ ] SELECT 문제에서 실행 전 예상 행 수를 작성했다.
-- [ ] 가상 학생 2명을 추가했다.
-- [ ] UPDATE 전후를 SELECT로 확인했다.
-- [ ] DELETE 전후를 SELECT로 확인했다.
-- [ ] UNIQUE 오류를 관찰했다.
-- [ ] NOT NULL 오류를 관찰했다.
-- [ ] `verify_students.sql`로 상태를 확인했다.
-- [ ] AI 제안을 실제 SQL 결과와 비교했다.
-- [ ] 개인 서비스 테이블 하나를 확장 설계했다.
-- [ ] 핵심 캡처는 3~4장 정도로 제한했다.
-- [ ] 비밀번호·개인정보가 캡처에 없다.
-- [ ] Markdown 이미지가 GitHub 웹 화면에서 정상 표시된다.
-- [ ] commit/push를 완료했다.
+- [o] `chapter04_answer.md`를 본인 저장소에 만들었다.
+- [o] 현재 DB와 실행 환경을 확인했다.
+- [o] `public.students`를 생성했다.
+- [o] 샘플 6명 입력 결과를 검증했다.
+- [o] SELECT 문제에서 실행 전 예상 행 수를 작성했다.
+- [o] 가상 학생 2명을 추가했다.
+- [o] UPDATE 전후를 SELECT로 확인했다.
+- [o] DELETE 전후를 SELECT로 확인했다.
+- [o] UNIQUE 오류를 관찰했다.
+- [o] NOT NULL 오류를 관찰했다.
+- [o] `verify_students.sql`로 상태를 확인했다.
+- [o] AI 제안을 실제 SQL 결과와 비교했다.
+- [o] 개인 서비스 테이블 하나를 확장 설계했다.
+- [o] 핵심 캡처는 3~4장 정도로 제한했다.
+- [o] 비밀번호·개인정보가 캡처에 없다.
+- [o] Markdown 이미지가 GitHub 웹 화면에서 정상 표시된다.
+- [o] commit/push를 완료했다.
 
 ---
 
@@ -624,7 +710,7 @@ https://github.com/<본인-GitHub-ID>/<본인-저장소>/blob/main/assignments/c
 내 제출 URL:
 
 ```text
-
+https://github.com/yeun0512/database-course-2026-2/edit/main/chapter04/chapter04_answer.md
 ```
 
 > 교수자 템플릿 URL이나 저장소 메인 URL이 아니라 **작성 완료된 본인 `chapter04_answer.md` 파일 화면 URL**을 제출합니다.
