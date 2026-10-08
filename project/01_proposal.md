@@ -90,94 +90,148 @@
 
 ## 3-2. 데이터 구조
 
-## 3-2-1. members 테이블
+### 3-2-1. `members` 테이블
 
-```text
-테이블 1 members는 회원 관리를 위한 것이다. 
-```
-| 열 이름 | 저장할 값 | 타입 후보 | NULL 가능? | UNIQUE 후보? | 이유 |
-| --- | --- | --- | --- | --- | --- |
-| id | 고유 번호 | 숫자 | no | no | 관리를 위해 부여하는 임의의 값으로, unique해야한다. |
-| name | 이름 | 문자열 | no | no | 이름은 동일한 사람이 있을 수 있기 때문이다. |
-| email | 이메일 | 문자열 | yes | yes | 이메일 정보는 개인마다 하나씩 서로 다르게 가지기 때문이다. |
-| age | 나이 | 숫자 | yes | no | 나이가 동일한 사람이 있을 수 있기 때문이다. |
-| address | 주소 | 문자열 | no | no | 하나의 주소에 여러 명이 거주하는 경우, 동일한 주소를 가질 수 있기 때문이다. |
-| item | 구독 식단| 문자열 | yes | no | 아직 구독하지 않은 회원이 있을 수 있고, 회원들이 동일한 식단을 구독할 수 있다. |
-| purpose | 구독 목적 | 문자열 | yes | no | 구독하지 않은 경우, null 가능하도록 한다. |
+회원 한 명을 관리한다.
 
-## 3-2-2. purpose 테이블
+| 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
+| --- | --- | --- | --- |
+| id | 회원 고유 번호 (PK) | no | yes |
+| name | 회원 이름 | no | no |
+| email | 회원 이메일 | yes | yes |
+| age | 회원 나이 | yes | no |
+| address | 회원 주소 | yes | no |
 
-```text
-테이블 2 purpose는 식단 목적 별 관리를 위한 것이다. 
-```
-| 열 이름 | 저장할 값 | 타입 후보 |
-| --- | --- | --- |
-| size | 단체, 개인 구독 여부 | 문자열 |
-| reason | 구독 목적 | 문자열 |
+### 3-2-2. `purpose` 테이블
 
-## 3-2-3. item 테이블
+식단 목적의 종류를 관리한다.
 
-```text
-테이블 3 item는 정기 배송 식단 종류 관리를 위한 것이다. 
-```
-| 열 이름 | 저장할 값 | 타입 후보 |
-| --- | --- | --- |
-| meal | 식단 종류 | 문자열 |
-| snack | 간식 종류 | 문자열 |
-| drink | 음료 종류 | 문자열 |
+| 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
+| --- | --- | --- | --- |
+| id | 식단 목적 고유 번호 (PK) | no | yes |
+| purpose_name | 식단 목적 이름 | no | yes |
+| description | 식단 목적에 대한 설명 | yes | no |
 
-## 3-2-4. factory 테이블
+### 3-2-3. `member_purposes` 테이블
 
-```text
-테이블 4 factory는 식단 제조 업체 관리를 위한 것이다.
-```
-| 열 이름 | 저장할 값 | 타입 후보 |
-| --- | --- | --- |
-| factname | 제조 업체 이름 | 문자열 |
-| factsize | 배송 가능 수량 | 문자열 |
-| factitem | 제조 상품 이름 | 문자열 |
-| factaddress | 제조 업체 위치 | 문자열 |
+회원과 식단 목적의 관계를 관리한다. 한 회원이 여러 목적을 선택할 수 있다.
 
-## 3-2-5. subscription 테이블
+| 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
+| --- | --- | --- | --- |
+| member_id | 회원 고유 번호 (`members.id` 참조, 복합 PK) | no | yes (member_id와 purpose_id 조합) |
+| purpose_id | 식단 목적 고유 번호 (`purpose.id` 참조, 복합 PK) | no | yes (member_id와 purpose_id 조합) |
+| selected_at | 회원이 목적을 선택한 시각 | no | no |
 
-```text
-테이블 5 subscription의 한 행은 구독 한 건을 의미한다.
-```
-## 3-2-6. purchase 테이블
+### 3-2-4. `factory` 테이블
 
-```text
-테이블 6 purchase의 한 행은 결제 한 건을 의미한다.
-```
-| 열 이름 | 저장할 값 | 타입 후보 |
-| --- | --- | --- |
-| time | 결제 시각 | 시간 |
-| payment | 결제 방법 | 문자열 |
+식단 제공 업체 한 곳을 관리한다.
 
-## 3-2-7. shipment 테이블
+| 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
+| --- | --- | --- | --- |
+| id | 업체 고유 번호 (PK) | no | yes |
+| factname | 업체 이름 | no | no |
+| factaddress | 업체 주소 | yes | no |
+| factsize | 배송 가능 수량 | yes | no |
+| capacity_unit | 배송 가능 수량의 단위 | yes | no |
+| capacity_period | 배송 가능 수량의 기준 기간 | yes | no |
 
-```text
-테이블 7 shipment의 한 행은 배송 사건 한 건을 의미한다.
-```
-| 열 이름 | 저장할 값 | 타입 후보 |
-| --- | --- | --- |
-| out | 출고 일자 | 문자열 |
-| arrive | 도착 일자 | 문자열 |
-| current | 배송 현황 | 문자열 |
+### 3-2-5. `item` 테이블
 
-## 3-2-8. goals 테이블
+식단 상품 한 종류를 관리한다. 영양 성분은 기준 제공량에 대한 값으로 저장한다.
 
-```text
-테이블 8 goals는 개인 별 목표 달성 현황 관리를 위한 것이다.
-```
-## 3-2-9. recommendation 테이블
+| 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
+| --- | --- | --- | --- |
+| id | 상품 고유 번호 (PK) | no | yes |
+| factory_id | 제공 업체 번호 (`factory.id` 참조) | no | no |
+| item_name | 상품 이름 | no | no |
+| category | 상품 종류 (식사, 간식, 음료 등) | no | no |
+| serving_size | 영양 정보의 기준 제공량 | yes | no |
+| calories_kcal | 기준 제공량의 열량 | yes | no |
+| carbohydrates_g | 기준 제공량의 탄수화물 양 | yes | no |
+| protein_g | 기준 제공량의 단백질 양 | yes | no |
+| fat_g | 기준 제공량의 지방 양 | yes | no |
 
-```text
-테이블 9 recommendation은 개인 별 만족도 관리를 위한 것이다. .
-```
-## 3-2-10. likes 테이블
+### 3-2-6. `subscription` 테이블
 
-```text
-테이블 10 likes는 관심 상품 관리를 위한 것이다.
+회원의 구독 한 건을 관리한다.
+
+| 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
+| --- | --- | --- | --- |
+| id | 구독 고유 번호 (PK) | no | yes |
+| member_id | 구독 회원 번호 (`members.id` 참조) | no | no |
+| item_id | 구독 식단 상품 번호 (`item.id` 참조) | no | no |
+| start_date | 구독 시작일 | no | no |
+| end_date | 구독 종료일 | yes | no |
+| status | 구독 상태 | no | no |
+
+### 3-2-7. `purchase` 테이블
+
+결제 시도 또는 결제 한 건을 관리한다. 테이블 이름은 `payment` 또는 `payments`로 바꾸면 의미가 더 분명하다.
+
+| 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
+| --- | --- | --- | --- |
+| id | 결제 고유 번호 (PK) | no | yes |
+| subscription_id | 관련 구독 번호 (`subscription.id` 참조) | no | no |
+| paid_at | 결제가 완료된 시각 | yes | no |
+| amount | 결제 금액 | no | no |
+| payment_method | 결제 방법 | yes | no |
+| status | 결제 상태 | no | no |
+
+### 3-2-8. `shipment` 테이블
+
+배송 사건 한 건을 관리한다.
+
+| 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
+| --- | --- | --- | --- |
+| id | 배송 고유 번호 (PK) | no | yes |
+| subscription_id | 관련 구독 번호 (`subscription.id` 참조) | no | no |
+| scheduled_date | 배송 예정일 | no | no |
+| out | 출고 시각 | yes | no |
+| arrive | 도착 시각 | yes | no |
+| current | 배송 상태 | no | no |
+| delivery_address | 배송지 | yes | no |
+
+### 3-2-9. `shipment_items` 테이블
+
+배송 한 건에 포함된 상품과 수량을 관리한다.
+
+| 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
+| --- | --- | --- | --- |
+| shipment_id | 배송 번호 (`shipment.id` 참조, 복합 PK) | no | yes (shipment_id와 item_id 조합) |
+| item_id | 상품 번호 (`item.id` 참조, 복합 PK) | no | yes (shipment_id와 item_id 조합) |
+| quantity | 배송된 상품 수량 | no | no |
+
+### 3-2-10. `goals` 테이블
+
+회원의 영양 목표 한 건을 관리한다.
+
+| 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
+| --- | --- | --- | --- |
+| id | 목표 고유 번호 (PK) | no | yes |
+| member_id | 목표 회원 번호 (`members.id` 참조) | no | no |
+| target_value | 목표 수치 | no | no |
+| period_type | 목표 기준 기간 | no | no |
+
+### 3-2-11. `recommendation` 테이블
+
+회원에게 추천한 상품과 추천에 대한 만족도를 관리한다.
+
+| 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
+| --- | --- | --- | --- |
+| id | 추천 고유 번호 (PK) | no | yes |
+| member_id | 추천 받은 회원 번호 (`members.id` 참조) | no | no |
+| item_id | 추천 상품 번호 (`item.id` 참조) | no | no |
+| satisfaction_score | 회원이 입력한 만족도 점수 | yes | no |
+
+### 3-2-12. `likes` 테이블
+
+회원이 관심 표시한 상품을 관리한다.
+
+| 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
+| --- | --- | --- | --- |
+| member_id | 회원 번호 (`members.id` 참조, 복합 PK) | no | yes (member_id와 item_id 조합) |
+| item_id | 관심 상품 번호 (`item.id` 참조, 복합 PK) | no | yes (member_id와 item_id 조합) |
+| liked_at | 관심 표시 시각 | no | no |
 ```
 ## 3-3. 미결정 내용
 
