@@ -264,17 +264,16 @@
 ## 4. 향후 구현 계획
 
 ### 4-1. ERD
-erDiagram
-    MEMBERS ||--o{ SUBSCRIPTION : has
-    FACTORY ||--o{ ITEM : provides
-    ITEM ||--o{ SUBSCRIPTION : selected_for
-    SUBSCRIPTION ||--o{ PURCHASE : has
-    SUBSCRIPTION ||--o{ SHIPMENT : receives
-    SHIPMENT ||--o{ SHIPMENT_ITEMS : contains
-    ITEM ||--o{ SHIPMENT_ITEMS : included_in
+
     
 ### 4-2. 향후 구현계획
-
+```
+1. 각 테이블의 기본 키와 외래 키를 정하고, 필수 입력값과 중복 방지 조건을 설정한다.
+2. 회원, 식단 목적, 업체, 상품 정보를 등록하고 구독과 연결한다.
+3. 구독별 배송 일정과 배송 상품·수량을 기록하고, 결제와 배송 상태를 관리한다.
+4. 배송된 상품의 영양 정보를 이용해 주간 요약을 제공한다. 실제 섭취량 기준 관리가 필요하면 섭취 기록 테이블을 추가한다.
+5. 미구독·만료 회원의 관리 방식, 구독 갱신 주기와 결제 실패 처리, 추천 범위를 결정한 뒤 관련 기능을 보완한다.
+```
 
 
 
