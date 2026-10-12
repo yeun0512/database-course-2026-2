@@ -349,11 +349,7 @@ loans FK 개수 = 2
 
 권장 경로:
 
-```text
-assignments/chapter05/images/step10_validation.png
-```
-
-`<img width="1120" height="778" alt="image" src="https://github.com/user-attachments/assets/77f8964f-968a-4001-905f-7ae32fecabc3" />`
+<img width="1120" height="778" alt="스크린샷 2026-10-12 171827" src="https://github.com/user-attachments/assets/2b8cf0f0-6d5a-4aa9-be14-4e6dae06bde9" />
 
 ---
 
