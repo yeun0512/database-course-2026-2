@@ -188,8 +188,19 @@ FK
 권장 이미지 경로:
 
 ```text
-assignments/chapter05/images/step07_library_erd.png
+`assignments/chapter05/images/step07_library_erd.png`
 ```
+
+권장 경로:
+
+```text
+assignments/chapter04/images/step04_select.png
+```
+
+`assignments/chapter05/images/step07_library_erd.png`
+
+---
+
 
 Markdown 예시:
 
@@ -314,8 +325,7 @@ members와 loans, books와 loans의 관계이다. 회원 101은 대여 기록 10
 assignments/chapter05/images/step09_seed_result.png
 ```
 
-`<img width="1140" height="846" alt="image" src="https://github.com/user-attachments/assets/fbf56157-8f9b-4cd6-adc3-ad12c4704c41" />
-`
+`<img width="1140" height="846" alt="image" src="https://github.com/user-attachments/assets/fbf56157-8f9b-4cd6-adc3-ad12c4704c41" />`
 
 ---
 
@@ -356,8 +366,7 @@ loans FK 개수 = 2
 assignments/chapter05/images/step10_validation.png
 ```
 
-`<img width="1120" height="778" alt="image" src="https://github.com/user-attachments/assets/77f8964f-968a-4001-905f-7ae32fecabc3" />
-`
+`<img width="1120" height="778" alt="image" src="https://github.com/user-attachments/assets/77f8964f-968a-4001-905f-7ae32fecabc3" />`
 
 ---
 
