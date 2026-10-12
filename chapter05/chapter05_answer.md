@@ -488,10 +488,12 @@ assignments/chapter05/images/step14_my_erd.png
 
 | 테이블 | 근거 요구사항 ID | 한 행의 의미 |
 | --- | --- | --- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-
+| members | P05-R01 | 회원 한 명 |
+| factory | P05-R02 | 업체 한 곳 |
+| item | P05-R03 | 상품 한 종류 |
+| subscription | P05-R01, P05-R04 | 구독 사건 한 건 |
+| purchase | P05-R07 | 결제 한 건 |
+| shipment | P05-R05 | 배송 사건 한 건 |
 ---
 
 # 15. 요구사항 추적표
@@ -503,9 +505,9 @@ assignments/chapter05/images/step14_my_erd.png
 | P05-R03 | item | item 테이블의 열을 확인한다 | 반영 |
 | P05-R04 | subscription | subscription 테이블이 회원을 참조하는지 확인한다 | 반영 |
 | P05-R05 | shipment | shipment 테이블이 배송 예정일과 실제 배송 상태 열을 가지고 있는지 확인한다 | 반영 |
-| P05-R06 | shipment_items | shipment 테이블이 item 테이블을 참조하는지 확인한다. 수량에 대한 속성 정보를 가지고 있는지 확인한다. | 반영 |
+| P05-R06 | shipment | shipment 테이블이 item 테이블을 참조하는지 확인한다. 수량에 대한 속성 정보를 가지고 있는지 확인한다. | 반영 |
 | P05-R07 | purchase | purchase 테이블이 subscription 테이블을 참조하는지 확인한다. 결제 금액 등 정보 열을 가지고 있는지 확인한다. | 반영 |
-| P05-R08 |  | 배송 상품의 영양 정보와 수량을 1주일 단위 집계된 열이 있는지 확인한다. | 반영되지 않음. 어떻게 관리할 것인지 확인이 필요하다. |
+| P05-R08 | nutrition | 배송 상품의 영양 정보와 수량을 1주일 단위 집계된 열이 있는지 확인한다. | 반영되지 않음. 어떻게 관리할 것인지 확인이 필요하다. |
 
 ### ERD 그림만으로 요구사항 누락을 발견하기 어려운 이유
 
