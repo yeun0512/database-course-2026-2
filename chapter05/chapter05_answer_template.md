@@ -314,7 +314,8 @@ loans 실제 행 수:
 <img width="1140" height="846" alt="스크린샷 2026-10-12 171402" src="https://github.com/user-attachments/assets/690d62f8-f8e8-41ea-97ac-924070c757b3" />
 ```
 
-`여기에 샘플 데이터 또는 관계 확인 화면을 삽입하세요.`
+<img width="1140" height="846" alt="스크린샷 2026-10-12 171402" src="https://github.com/user-attachments/assets/257d0010-4441-4caf-8f91-c2aedbd47940" />
+
 
 ---
 
