@@ -191,16 +191,6 @@ FK
 `assignments/chapter05/images/step07_library_erd.png`
 ```
 
-권장 경로:
-
-```text
-assignments/chapter04/images/step04_select.png
-```
-
-`assignments/chapter05/images/step07_library_erd.png`
-
----
-
 
 Markdown 예시:
 
@@ -326,7 +316,7 @@ assignments/chapter05/images/step09_seed_result.png
 ```
 
 `<img width="1140" height="846" alt="image" src="https://github.com/user-attachments/assets/fbf56157-8f9b-4cd6-adc3-ad12c4704c41" />`
-
+![Seed result](https://github.com/user-attachments/assets/fbf56157-8f9b-4cd6-adc3-ad12c4704c41)
 ---
 
 # 10. 검증 SQL 실행
