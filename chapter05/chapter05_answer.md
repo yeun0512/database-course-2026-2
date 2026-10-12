@@ -311,9 +311,8 @@ members와 loans, books와 loans의 관계이다. 회원 101은 대여 기록 10
 
 권장 경로:
 
-```text
-`<img width="1140" height="846" alt="image" src="https://github.com/user-attachments/assets/fbf56157-8f9b-4cd6-adc3-ad12c4704c41" />`
-```
+<img width="1140" height="846" alt="스크린샷 2026-10-12 171402" src="https://github.com/user-attachments/assets/5f4e22a3-de71-4ac0-b5c3-f669b73126e8" />
+
 
 ---
 
