@@ -312,11 +312,9 @@ members와 loans, books와 loans의 관계이다. 회원 101은 대여 기록 10
 권장 경로:
 
 ```text
-assignments/chapter05/images/step09_seed_result.png
+`<img width="1140" height="846" alt="image" src="https://github.com/user-attachments/assets/fbf56157-8f9b-4cd6-adc3-ad12c4704c41" />`
 ```
 
-`<img width="1140" height="846" alt="image" src="https://github.com/user-attachments/assets/fbf56157-8f9b-4cd6-adc3-ad12c4704c41" />`
-![Seed result](https://github.com/user-attachments/assets/fbf56157-8f9b-4cd6-adc3-ad12c4704c41)
 ---
 
 # 10. 검증 SQL 실행
@@ -390,8 +388,8 @@ assignments/chapter05/images/step10_validation.png
 지금까지 선택한 개인 서비스 아이디어를 사용합니다.
 
 ```text
-서비스 이름: 
-서비스 목적:
+서비스 이름: 도시락 정기 배송 서비스 
+서비스 목적: 1) 도시락 정기 배송 업체 비교 2) 이용자 누적 영양소 관리
 ```
 
 ## 12-1. 요구사항
