@@ -261,5 +261,20 @@
 3. 추천 대상은 구독 식단, 개별 상품 중 어디까지로 하고 어떤 정보를 활용할 것인지, 활용할 것인지 결정하지 않았다. 
 4. 구독 갱신 주기와 결제 실패, 등 상황을 어떻게 관리할 것인지 결정하지 않았다. 
 ```
+## 4. 향후 구현 계획
+
+### 4-1. ERD
+erDiagram
+    MEMBERS ||--o{ SUBSCRIPTION : has
+    FACTORY ||--o{ ITEM : provides
+    ITEM ||--o{ SUBSCRIPTION : selected_for
+    SUBSCRIPTION ||--o{ PURCHASE : has
+    SUBSCRIPTION ||--o{ SHIPMENT : receives
+    SHIPMENT ||--o{ SHIPMENT_ITEMS : contains
+    ITEM ||--o{ SHIPMENT_ITEMS : included_in
+    
+### 4-2. 향후 구현계획
+
+
 
 
