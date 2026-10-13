@@ -248,6 +248,7 @@
 ## 4. 향후 구현 계획
 
 ### 4-1. ERD
+<img width="957" height="533" alt="Screenshot 2026-10-13 at 6 32 47 PM" src="https://github.com/user-attachments/assets/e6028957-2da7-4899-8623-f76c2cd7abb3" />
 
     
 ### 4-2. 향후 구현계획
