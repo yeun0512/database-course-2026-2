@@ -130,8 +130,7 @@
 | 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
 | --- | --- | --- | --- |
 | id | 식단 목적 고유 번호 (PK) | no | yes |
-| purpose_name | 식단 목적 이름 | no | yes |
-| description | 식단 목적에 대한 설명 | yes | no |
+| purpose_name | 식단 목적 이름 | no | no |
 
 ### 3-2-3. `member_purposes` 테이블
 
@@ -154,7 +153,6 @@
 | factaddress | 업체 주소 | yes | no |
 | factsize | 배송 가능 수량 | yes | no |
 | capacity_unit | 배송 가능 수량의 단위 | yes | no |
-| capacity_period | 배송 가능 수량의 기준 기간 | yes | no |
 
 ### 3-2-5. `item` 테이블
 
@@ -185,15 +183,13 @@
 | end_date | 구독 종료일 | yes | no |
 | status | 구독 상태 | no | no |
 
-### 3-2-7. `purchase` 테이블
-
-결제 시도 또는 결제 한 건을 관리한다. 테이블 이름은 `payment` 또는 `payments`로 바꾸면 의미가 더 분명하다.
+### 3-2-7. `payment` 테이블
 
 | 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
 | --- | --- | --- | --- |
 | id | 결제 고유 번호 (PK) | no | yes |
 | subscription_id | 관련 구독 번호 (`subscription.id` 참조) | no | no |
-| paid_at | 결제가 완료된 시각 | yes | no |
+| time | 결제가 완료된 시각 | yes | no |
 | amount | 결제 금액 | no | no |
 | payment_method | 결제 방법 | yes | no |
 | status | 결제 상태 | no | no |
@@ -206,23 +202,16 @@
 | --- | --- | --- | --- |
 | id | 배송 고유 번호 (PK) | no | yes |
 | subscription_id | 관련 구독 번호 (`subscription.id` 참조) | no | no |
-| scheduled_date | 배송 예정일 | no | no |
+| scheduled | 배송 예정일 | no | no |
 | out | 출고 시각 | yes | no |
 | arrive | 도착 시각 | yes | no |
 | current | 배송 상태 | no | no |
 | delivery_address | 배송지 | yes | no |
-
-### 3-2-9. `shipment_items` 테이블
-
-배송 한 건에 포함된 상품과 수량을 관리한다.
-
-| 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
-| --- | --- | --- | --- |
 | shipment_id | 배송 번호 (`shipment.id` 참조, 복합 PK) | no | yes (shipment_id와 item_id 조합) |
 | item_id | 상품 번호 (`item.id` 참조, 복합 PK) | no | yes (shipment_id와 item_id 조합) |
 | quantity | 배송된 상품 수량 | no | no |
 
-### 3-2-10. `goals` 테이블
+### 3-2-9. `goals` 테이블
 
 회원의 영양 목표 한 건을 관리한다.
 
@@ -233,26 +222,21 @@
 | target_value | 목표 수치 | no | no |
 | period_type | 목표 기준 기간 | no | no |
 
-### 3-2-11. `recommendation` 테이블
+### 3-2-10. `nutritions` 테이블
 
-회원에게 추천한 상품과 추천에 대한 만족도를 관리한다.
-
-| 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
-| --- | --- | --- | --- |
-| id | 추천 고유 번호 (PK) | no | yes |
-| member_id | 추천 받은 회원 번호 (`members.id` 참조) | no | no |
-| item_id | 추천 상품 번호 (`item.id` 참조) | no | no |
-| satisfaction_score | 회원이 입력한 만족도 점수 | yes | no |
-
-### 3-2-12. `likes` 테이블
-
-회원이 관심 표시한 상품을 관리한다.
+회원의 누적 영양 정보 한 건을 관리한다.
 
 | 열 이름 | 저장할 값 | NULL 가능? | UNIQUE 후보? |
 | --- | --- | --- | --- |
-| member_id | 회원 번호 (`members.id` 참조, 복합 PK) | no | yes (member_id와 item_id 조합) |
-| item_id | 관심 상품 번호 (`item.id` 참조, 복합 PK) | no | yes (member_id와 item_id 조합) |
-| liked_at | 관심 표시 시각 | no | no |
+| id | 영양 관리 고유 번호 (PK) | no | yes |
+| member_id | 회원 번호 (`members.id` 참조) | no | yes |
+| period_type | 기준 기간 | no | no |
+| nutrition_kcal | 열량 합계 | yes | no |
+| nutrition_carbohydrates | 탄수화물 양 합계 | yes | no |
+| nutrition_protein | 단백질 양 합계 | yes | no |
+| nutrition_fat | 지방 양 합계 | yes | no |
+
+
 
 ## 3-3. 미결정 내용
 ```
