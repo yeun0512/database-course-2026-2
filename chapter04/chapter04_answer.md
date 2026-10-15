@@ -35,7 +35,7 @@ SHOW transaction_read_only;
 | current_database() | ai_database_book | 현재 DB가 ai_database_book이다. |
 | current_user | postgres | 유저 이름이 postgres이다. |
 | current_schema() | public | public 스키마이다. |
-| search_path | public, "$user" | public, user의 경로이다. |
+| search_path | public, "$user" | 스키마명을 생략했을 때 객체를 찾는 스키마 검색 순서이다. |
 | transaction_read_only | off | 수정 가능 모드이다. |
 
 - [0] 현재 DB가 `ai_database_book`이다.
@@ -145,7 +145,7 @@ code/chapter04/02_insert_students.sql
 ### `created_at` 값이 여러 행에서 같을 수 있는 이유
 
 ```text
-생성된 시각이 같기 때문이다. 
+동시에 실행하여 생성된 시각이 같기 때문이다. 
 ```
 
 ---
@@ -203,19 +203,19 @@ FROM public.students;
 ## 4-2. `= NULL` 대신 `IS NULL`을 사용하는 이유
 
 ```text
-= NULL을 활용하는 경우, NULL 인 행이 6개인 것으로 표시된다. 
+NULL은 값이 없는 경우를 의미한다. = NULL은로 조회하는 경우에는, NULL로 나타나는 행이 실제로 존재하는 것이 아니기 때문에 WHERE 조건에서 행이 조회되지 않는다. 따라서, NULL 을 찾기 위해서 IS NULL을 사용해야한다. 
 ```
 
 ## 4-3. `ORDER BY` 없이 결과 순서를 믿으면 안 되는 이유
 
 ```text
-기준이 마련되어 있어야하기 때문이다. 어떠한 기준으로 정렬된 값인지를 알 수 없다. 
+기준이 마련되어 있어야하기 때문이다. 어떠한 기준으로 정렬된 값인지를 알 수 없다. 데이터베이스는 결과의 순서를 보장하지 않기 떄문이다. 
 ```
 
 ## 4-4. `DISTINCT`가 원본 데이터를 삭제하는 기능인가요?
 
 ```text
-아니요. DISTINCT 는 조회 결과에서 중복된 결과를 제거하는 기능입니다. 
+아니요. DISTINCT 는 조회 결과에서 중복된 행이 있는 경우, 이러한 행을 한 번만 표시하는 기능이다. 원본 데이터 자체는 삭제, 변경되지 않는다. 
 ```
 
 ### 증거 화면
@@ -323,7 +323,7 @@ ORDER BY id ASC;
 ### `WHERE` 없는 UPDATE를 실행하면 위험한 이유
 
 ```text
-변경하려고 하지 않았던 데이터까지 변경되어버릴 우려가 있기 때문이다.
+변경하려고 하지 않았던 데이터까지 변경되어버릴 우려가 있기 때문이다. update의 범위를 명확히 설정하지 않아서 위험하다. 
 ```
 
 ### 증거 화면
