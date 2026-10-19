@@ -478,7 +478,7 @@ Chapter 05에서 만든 개인 서비스 ERD를 다시 엽니다.
 assignments/chapter06/images/step10_my_erd_after.png
 ```
 
-`여기에 수정한 개인 ERD 이미지를 삽입하세요.`
+ <img width="846" height="466" alt="image" src="https://github.com/user-attachments/assets/30f467e9-a179-4999-ba6f-b3dd166a0b69" />
 
 ---
 
