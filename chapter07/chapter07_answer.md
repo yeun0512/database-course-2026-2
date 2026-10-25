@@ -11,9 +11,9 @@
 이 파일과 캡처 화면에는 실제 비밀번호, 전체 DB 접속 URL, API Key, 개인정보를 기록하지 않습니다.
 
 ```text
-GitHub 계정 또는 별칭:
-과제 작성일:
-사용한 AI 도구:
+GitHub 계정 또는 별칭: yeun0512
+과제 작성일: 2026.10.25
+사용한 AI 도구: GPT
 ```
 
 ---
@@ -105,13 +105,13 @@ SHOW transaction_read_only;
 ## 3-1. 한 행 의미
 
 ```text
-course_project.students 한 행 =
+course_project.students 한 행 = 학생 한 명
 
-course_project.instructors 한 행 =
+course_project.instructors 한 행 = 강사 한 명
 
-course_project.courses 한 행 =
+course_project.courses 한 행 = 개설된 강의 한 개
 
-course_project.enrollments 한 행 =
+course_project.enrollments 한 행 = 한 학생이 한 강의에 신청한 사건 한 건
 ```
 
 ## 3-2. 키와 중요 규칙
@@ -127,21 +127,33 @@ course_project.enrollments 한 행 =
 
 ```text
 instructors ↔ courses:
+한 강사는 0개 이상의 강의를 담당할 수 있다.
+한 강의는 정확히 한 강사를 참조한다.
 
 students ↔ enrollments:
+한 학생은 0개 이상의 신청을 가질 수 있다.
+한 신청은 정확히 한 학생을 참조한다.
 
 courses ↔ enrollments:
+한 강의는 0개 이상의 신청을 가질 수 있다.
+한 신청은 정확히 한 강의를 참조한다.
 ```
 
 ### 학생과 강의의 N:M 관계가 `enrollments`를 통해 어떻게 바뀌는지 설명
 
 ```text
+사건 한 명은 여러개의 강의를 들을 수 있다. 또한, 하나의 강의는 여러 학생에 의해 수강될 수 있다 이때, enrollment는 양 자를 연결하는 테이블이다.
+학생 한 명은 여러개의 신청을 가질 수 있고, 하나의 신청은 한 학생을 참조한다. 또한, 한 강의는 여러개의 신청을 가질 수 있고, 하나의 신청은 한 강의를 참조한다.
+따라서, 신청을 나타내는 enrollments를 통해 학생과 신청에 대한 1:N 관계, 강의와 신청에 대한 1:N 관계가 생긴다.
+즉 enrollment는 즉 학생과 강의의 N:M 관계를 풀어준다.
 
 ```
 
 ### `enrollments`가 단순 연결 테이블이 아니라 사건 테이블이라고 볼 수 있는 이유
 
 ```text
+enrollments는 단순히 학생 ID와 강의 ID만 연결하는 것이 아니라 속성을 지니기 때문이다. enrollment에는 등록 시각, 현황 등 별도의 정보가 저장된다.
+이러한 사건 속성을 가지기 때문에 이는 수강신청 사건을 나타내는 사건 테이블이다. 
 
 ```
 
@@ -150,21 +162,23 @@ courses ↔ enrollments:
 # 4. `recorded_amount`의 의미 이해
 
 ```text
-courses.price =
+courses.price = 현재 강의의 기준 가격
 
-enrollments.recorded_amount =
+enrollments.recorded_amount = 신청이 이루어질 때, 해당 신청 행에 기록 된 금액 
 ```
 
 ### 두 값이 처음에는 같아도 같은 의미가 아닌 이유
 
 ```text
-
+현재 강의의 기준 가격과 기록된 금액이 같다는 의미이다. 처음에 할인이 없는 경우라면, 신청 시점에 기록되어야 하는 금액과 기준 금액이 같다.
+그러나 시점의 변화에 따라 기준 가격과, 신청 당시 가격은 달라질 수 있다 따라서, 두 값이 처음에는 같게 나타날 수 있더라도 같은 의미는 아니다. 
 ```
 
 ### `recorded_amount`를 실제 결제 성공액이나 회계 매출로 해석하면 안 되는 이유
 
 ```text
-
+신청이 이루어질 때, 기록된 금액이지만 이는 실제 결제 성공액과는 상이할 수 있다.
+할인 등이 반영된 금액이 아니기 때문이다. 따라셔, 기록된 금액과 결제 성공액 및 회계 매출을 구분해야한다. 
 ```
 
 ---
