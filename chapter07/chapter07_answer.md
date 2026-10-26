@@ -32,11 +32,11 @@ SHOW transaction_read_only;
 
 | 확인 항목 | 실제 결과 | 의미 |
 | --- | --- | --- |
-| `current_database()` |  |  |
-| `current_user` |  |  |
-| `current_schema()` |  |  |
-| `search_path` |  |  |
-| `transaction_read_only` |  |  |
+| `current_database()` | ai_database_book |  |
+| `current_user` | postgres |  |
+| `current_schema()` | public |  |
+| `search_path` | public, "$user" |  |
+| `transaction_read_only` | off |  |
 
 - [ ] 현재 DB가 `ai_database_book`이다.
 - [ ] 쓰기 가능한 연결인지 확인했다.
