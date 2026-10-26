@@ -294,9 +294,9 @@ code/chapter07/03_course_project_changes.sql
 
 | 신청 ID | 변경 전 예상 상태 | 변경 후 예상 상태 | 예상 recorded_amount |
 | ---: | --- | --- | ---: |
-| 1001 |  |  |  |
-| 1004 |  |  |  |
-| 1005 |  |  |  |
+| 1001 | 수강중 | 완료 | 100,000 |
+| 1004 | 신청 | 취소 | 150,000 |
+| 1005 | - | 신청 | 120,000 |
 
 ```text
 변경 후 예상 enrollments 행 수: 5
@@ -349,22 +349,24 @@ code/chapter07/04_course_project_validation.sql
 ## 8-1. 최종 검증 결과
 
 ```text
-최종 행 수 students/instructors/courses/enrollments:
-서비스 JOIN 결과 행 수:
-학생 101 신청 수:
-강의 301 신청 수:
-강사 201 강의 수:
-고아 관계 수:
-활성 중복 신청 수:
-전체 recorded_amount:
-취소 제외 recorded_amount:
-통과 메시지:
+최종 행 수 students/instructors/courses/enrollments: 3/2/3/5
+서비스 JOIN 결과 행 수: 5
+학생 101 신청 수: 2
+강의 301 신청 수: 2
+강사 201 강의 수: 2
+고아 관계 수: 0
+활성 중복 신청 수: 0
+전체 recorded_amount: 590,000
+취소 제외 recorded_amount: 440,000
+통과 메시지: Chapter 07 course project validation passed
 ```
 
 ### SQL 파일 4개가 모두 실행되었다는 사실과 프로젝트 검증 PASS가 다른 이유
 
 ```text
-
+SQL 파일이 실행되었다는 것은 각 파일의 명령이 실행되었다는 뜻이다.
+하지만 명령 실행만으로는 업무 규칙에 맞게 테이블의 구조 및 관계 등이 구성되었다고 단정할 수는 없다.
+따라서, 최종 검증은 행 수, JOIN 결과, 고아 관계, 활성 중복 신청 등을 확인하여 프로젝트를 검증하여야 한다. 검증 PASS는 검증 조건을 통과한 것을 의미하므로, 업무 규칙 및 의도에 맞게 구성되었음을 확인할 수 있게 한다.
 ```
 
 ### 증거 화면
@@ -375,7 +377,7 @@ code/chapter07/04_course_project_validation.sql
 assignments/chapter07/images/step08_validation.png
 ```
 
-`여기에 최종 validation PASS 화면을 삽입하세요.`
+<img width="1389" height="708" alt="image" src="https://github.com/user-attachments/assets/22643f0a-3d19-43db-96ea-3cbe8148db2b" />
 
 ---
 
@@ -392,43 +394,44 @@ code/chapter07/05_course_project_integrity_tests.sql
 ## 9-1. 허용되어야 하는 경계값 1개
 
 ```text
-테스트 내용:
-기대 결과:
-실제 결과:
-왜 허용되어야 하는가:
+테스트 내용: 강의 가격과 신청 기록 금액이 0이고, description 이 NULL이다. 
+기대 결과: INSERT 성공
+실제 결과: 성공하였다. 
+왜 허용되어야 하는가: 가격 및 금액에 대한 조건으로는 음수만 아니면 되는 것으로 설정하였고, description 은 필수 입력 항목이 아니었기 때문이다. 
 ```
 
 ## 9-2. 실패해야 하는 테스트 1 — 잘못된 참조 또는 값
 
 ```text
-테스트 내용:
-기대 결과:
-실제 오류 핵심:
-동작한 제약조건/규칙:
-왜 실패해야 하는가:
+테스트 내용: 학생 ID 999 (존재하지 않는 학생) 참조하는 수강신청
+기대 결과: INSERT 실패
+실제 오류 핵심: "fk_course_enrollments_student" 참조키(foreign key) 제약 조건을 위배했습니다
+동작한 제약조건/규칙:fk_course_enrollments_student
+왜 실패해야 하는가: 수강신청은 실제 존재하는 학생만을 참조하도록 제약 조건을 부여하였기 때문이다. 이외에도 존재하지 않는 강사 참조, 강의 참조 또한 실패한다.
 ```
 
 ## 9-3. 실패해야 하는 테스트 2 — 활성 중복 신청
 
 ```text
-테스트 내용:
-기대 결과:
-실제 오류 핵심:
-동작한 인덱스/규칙:
-왜 실패해야 하는가:
+테스트 내용: 학생 101 (이미 신청 있음)이 강의 302 신청
+기대 결과:INSERT 실패
+실제 오류 핵심:"uq_course_enrollments_active" 고유 제약 조건을 위반함
+동작한 인덱스/규칙:uq_course_enrollments_active 부분 고유 인덱스
+왜 실패해야 하는가: 같은 학생이 같은 강의에 신청을 중복으로 보유하지 못하도록 하는 제약 조건을 부여하였기 때문이다. 
 ```
 
 ## 9-4. 실패 후 기준 상태 재검증
 
 ```text
-04 validation 재실행 결과:
-기준 데이터가 유지되었는가:
+04 validation 재실행 결과: Chapter 07 core integrity test baseline preserved
+기준 데이터가 유지되었는가: 네. 재검증 결과 통과하였습니다.
 ```
 
 ### 실패 테스트가 프로젝트 품질 검증에 필요한 이유
 
 ```text
-
+잘못된 참조, 업무 조건에 어긋난 중복 신청 등이 있는 경우 데이터베이스가 실제로 입력을 막을 수 있는지 확인할 수 있어야 하기 때문이다.
+또한, 실패 테스트 이후 기준 데이터를 다시 검증하는 경우 기존 데이터의 손실이 없는지 또한 확인할 수 있기 때문에 필요하다. 
 ```
 
 ### 증거 화면
@@ -439,7 +442,7 @@ code/chapter07/05_course_project_integrity_tests.sql
 assignments/chapter07/images/step09_integrity.png
 ```
 
-`여기에 대표 실패 테스트와 기준 상태 유지 결과를 삽입하세요.`
+<img width="1374" height="706" alt="image" src="https://github.com/user-attachments/assets/f8bdb322-f29b-419e-86be-5ef4218a6c21" />
 
 ---
 
