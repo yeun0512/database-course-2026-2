@@ -195,29 +195,31 @@ code/chapter07/01_course_project_schema.sql
 ## 5-1. 실행 전 예상
 
 ```text
-course_project 스키마 존재 여부:
-예상 테이블 수:
-예상 데이터 행 수:
-예상되는 명명 제약조건 수:
-예상되는 NOT NULL 열 수:
-부분 고유 인덱스 존재 여부:
+course_project 스키마 존재 여부: 네. 
+예상 테이블 수: 4개
+예상 데이터 행 수: 각각 0개 
+예상되는 명명 제약조건 수: 15개
+예상되는 NOT NULL 열 수: 20개
+부분 고유 인덱스 존재 여부: 있음
 ```
 
 ## 5-2. 실행 결과
 
 ```text
-실제 테이블 수:
-실제 명명 제약조건 수:
-실제 NOT NULL 열 수:
-부분 고유 인덱스:
-네 테이블의 실제 행 수:
-통과 메시지:
+실제 테이블 수: 4개
+실제 명명 제약조건 수: 15개 
+실제 NOT NULL 열 수: 20개 
+부분 고유 인덱스: 존재
+네 테이블의 실제 행 수: 각각 0개
+통과 메시지:Chapter 07 course project schema creation passed
+
 ```
 
 ### 예상과 실제 비교
 
 ```text
-
+테이블 4개, 각각 행 수 0개로 예상과 일치한다.
+부분 고유 인덱스인 uq_course_enrollments_active 가 존재한다. 명명 제약 조건 15개와 NOT NULL 열 20개인 것 또한 예상과 일치한다. 
 ```
 
 ### 증거 화면
@@ -228,7 +230,7 @@ course_project 스키마 존재 여부:
 assignments/chapter07/images/step05_schema.png
 ```
 
-`여기에 스키마/테이블 생성 검증 화면을 삽입하세요.`
+<img width="1256" height="786" alt="image" src="https://github.com/user-attachments/assets/872aa4b7-8353-4eff-91bc-e32a67b214ee" />
 
 ---
 
@@ -243,39 +245,39 @@ code/chapter07/02_course_project_seed.sql
 ## 6-1. 실행 전 예상
 
 ```text
-students:
-instructors:
-courses:
-enrollments:
-recorded_amount 합계:
-학생 101 신청 건수:
-강의 301 신청 건수:
-강사 201 담당 강의 수:
-활성 중복 신청:
+students: 3
+instructors: 2
+courses: 3
+enrollments: 4
+recorded_amount 합계: 470,000
+학생 101 신청 건수: 2건
+강의 301 신청 건수: 2건
+강사 201 담당 강의 수: 2건
+활성 중복 신청: 0건
 ```
 
 ## 6-2. 실제 결과
 
 ```text
-students:
-instructors:
-courses:
-enrollments:
-recorded_amount 합계:
-학생 101 신청 건수:
-강의 301 신청 건수:
-강사 201 담당 강의 수:
-활성 중복 신청:
-1001 상태:
-1004 상태:
-1005 존재 여부:
-통과 메시지:
+students: 3
+instructors: 2
+courses: 3
+enrollments: 4
+recorded_amount 합계: 470,000
+학생 101 신청 건수: 2건
+강의 301 신청 건수: 2건
+강사 201 담당 강의 수: 2건
+활성 중복 신청: 0건
+1001 상태: 수강중
+1004 상태: 신청
+1005 존재 여부: 없음
+통과 메시지:Chapter 07 course project seed passed
 ```
 
 ### Seed 데이터를 단순 예제가 아니라 검증 데이터라고 볼 수 있는 이유
 
 ```text
-
+테이블에 데이터를 넣은 이후, 기록된 금액을 합계하고, 학생, 강의, 강사의 관계를 볼 수 있는 등 입력한 데이터가 업무 규칙에 맞게 관계를 가지고 있는지를 직접 확인할 수 있기 때문이다. 또한, 활성 중복 신청이 있는지 확인할 수 있는 등을 검증할 수 있다. 
 ```
 
 ---
@@ -297,30 +299,30 @@ code/chapter07/03_course_project_changes.sql
 | 1005 |  |  |  |
 
 ```text
-변경 후 예상 enrollments 행 수:
-변경 후 예상 전체 recorded_amount 합계:
-변경 후 예상 취소 제외 건수:
-변경 후 예상 취소 제외 recorded_amount 합계:
+변경 후 예상 enrollments 행 수: 5
+변경 후 예상 전체 recorded_amount 합계: 590,000
+변경 후 예상 취소 제외 건수: 4건
+변경 후 예상 취소 제외 recorded_amount 합계: 440,000
 ```
 
 ## 7-2. 실제 결과
 
 ```text
-1001 상태 / recorded_amount:
-1004 상태 / recorded_amount:
-1005 상태 / recorded_amount:
-최종 enrollments 행 수:
-전체 recorded_amount 합계:
-취소 제외 건수:
-취소 제외 recorded_amount 합계:
-활성 중복 신청:
-통과 메시지:
+1001 상태 / recorded_amount: 100000
+1004 상태 / recorded_amount: 150000
+1005 상태 / recorded_amount: 120000
+최종 enrollments 행 수: 5행, WHERE id IN (1001, 1004, 1005)로 조회하는 경우, 3개 행 조회
+전체 recorded_amount 합계: 590,000
+취소 제외 건수: 4건
+취소 제외 recorded_amount 합계: 440,000
+활성 중복 신청: 0
+통과 메시지:Chapter 07 course project changes passed
 ```
 
 ### 조건부 UPDATE에서 예상 이전 상태를 확인해야 하는 이유
 
 ```text
-
+현재 상태가 예상과 일치하는 지 확인하는 것을 통해, 변경이 적절하게 이루어졌는지를 확인할 수 있다. 예를 들어, 다른 상태로 이미 바뀐 행을 잘못 수정하는 일을 막거나, 변경이 적용되지 않았는지 여부를 확인할 수 있다.
 ```
 
 ### 증거 화면
@@ -330,8 +332,9 @@ code/chapter07/03_course_project_changes.sql
 ```text
 assignments/chapter07/images/step07_changes.png
 ```
+<img width="1244" height="743" alt="image" src="https://github.com/user-attachments/assets/1148f200-6fc6-4797-ab73-7547bdcdf875" />
 
-`여기에 주요 변경 전/후 결과를 삽입하세요.`
+<img width="1450" height="969" alt="image" src="https://github.com/user-attachments/assets/d55f3af9-209d-42e6-85da-5ccd06f6bb32" />
 
 ---
 
