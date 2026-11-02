@@ -29,19 +29,19 @@ code/chapter08/00_check_course_project.sql
 ## 1-1. 사전 검사 결과
 
 ```text
-검증 메시지:
+검증 메시지:Chapter 08 prerequisite check passed
 
-students 행 수:
-instructors 행 수:
-courses 행 수:
-enrollments 행 수:
+students 행 수:3
+instructors 행 수: 2
+courses 행 수: 3
+enrollments 행 수: 5
 
-전체 신청 건수:
-전체 recorded_amount:
-활성 신청 건수:
-활성 recorded_amount:
-취소 제외 신청 건수:
-취소 제외 recorded_amount:
+전체 신청 건수: 5
+전체 recorded_amount:590000
+활성 신청 건수:3
+활성 recorded_amount: 340000
+취소 제외 신청 건수: 4
+취소 제외 recorded_amount:440000
 ```
 
 기준값:
@@ -71,7 +71,7 @@ enrollments = 5
 assignments/chapter08/images/step01_prerequisite.png
 ```
 
-`여기에 사전 검사 통과 화면을 삽입하세요.`
+<img width="1336" height="813" alt="image" src="https://github.com/user-attachments/assets/4ace1a82-ce24-4e11-a266-ebac4117f2de" />
 
 ---
 
@@ -82,26 +82,26 @@ assignments/chapter08/images/step01_prerequisite.png
 ## 질문 A
 
 ```text
-업무 질문:
-결과 한 행의 의미:
-포함 상태:
-제외 상태:
-JOIN할 테이블:
+업무 질문: 취소되지 않은 신청 수를 강의별로 보여주세요
+결과 한 행의 의미: 강의 한 개
+포함 상태: 신청, 수강중, 완료
+제외 상태: 취소
+JOIN할 테이블: courses, enrollments
 JOIN 경로:
-INNER JOIN / LEFT JOIN 선택:
-그 이유:
+INNER JOIN / LEFT JOIN 선택: LEFT JOIN
+그 이유:  
 예상 행 수:
 ```
 
 ## 질문 B
 
 ```text
-업무 질문:
-결과 한 행의 의미:
-포함 상태:
-제외 상태:
-JOIN할 테이블:
-JOIN 경로:
+업무 질문: 취소되지 않은 신청 수를 학생별로 보여주세요
+결과 한 행의 의미: 학생 한 명
+포함 상태: 신청, 수강중, 완료
+제외 상태: 취소
+JOIN할 테이블:students, enrollments
+JOIN 경로: 
 집계 대상:
 예상 결과:
 ```
@@ -109,12 +109,12 @@ JOIN 경로:
 ## 질문 C
 
 ```text
-업무 질문:
-결과 한 행의 의미:
-포함 상태:
-제외 상태:
-0건인 부모도 보여야 하는가:
-NULL을 어떻게 해석할 것인가:
+업무 질문: 강사 별 취소 제외 신청 수를 조회하도록 해주세요
+결과 한 행의 의미: 강사 한 명
+포함 상태: 신청, 수강중, 완료
+제외 상태: 취소
+0건인 부모도 보여야 하는가: 보여야 한다. 강사는 존재하지만, 취소되지 않은 신청 수가 0건인 강사가 존재할 수 있다. 이런 경우, 단순 LEFT JOIN을 한다면, 어떤 강사는 '취소되지 않은 신청'을 가지지 않아 누락될 수 있다. 누락이 되지 않도록 하는 것이 적절하므로, 0건인 부모도 보이도록 한다. 
+NULL을 어떻게 해석할 것인가: 원본 강사 테이블에 저장된 값으로 해석해서는 안된다. 이는 JOIN 조건에 맞는 오른쪽 행이 없어서 결과 과정에서 생성된 NULL 이라고 해석해야 한다.
 예상 결과:
 ```
 
@@ -127,45 +127,71 @@ NULL을 어떻게 해석할 것인가:
 실행 전 예상:
 
 ```text
-결과 한 행 =
-예상 행 수 =
-JOIN 경로 =
+결과 한 행 = 수강신청 한 건에 대한 학생, 강의 이름
+예상 행 수 = 5
+JOIN 경로 = enrollments.student_id -> students.id, enrollments.course_id -> courses.id
 ```
 
 내가 실행한 SQL:
 
 ```sql
+SELECT
+    e.id AS enrollment_id,
+    s.name AS student_name,
+    c.title AS course_title,
+    e.status
+FROM course_project.enrollments AS e
+INNER JOIN course_project.students AS s
+    ON e.student_id = s.id
+INNER JOIN course_project.courses AS c
+    ON e.course_id = c.id
+ORDER BY e.id;
 
 ```
 
 실제 결과:
 
 ```text
-실제 행 수:
-예상과 일치 여부:
+실제 행 수: 5
+예상과 일치 여부: 일치한다.
 ```
 
 ### 학생 이름이 여러 번 보이는 것이 중복 오류가 아닐 수 있는 이유
 
 ```text
-
+학생 이름이 여러 번 보이는 것은 한 학생이 여러 강의에 신청할 수 있기 때문이다. 즉, 학생과 신청이 일대다의 관계를 가지기 때문이다. 결과 한 행의 기준은 학생 한 명이 아니라 수강신청 한 건이므로, 같은 학생 이름이 반복되어도 중복 오류라고 볼 수 없다.
 ```
 
 ## 3-2. 학생·강의·강사까지 연결
 
 ```text
-결과 한 행 =
-강사까지 가는 JOIN 경로 =
+결과 한 행 = 수강신청 한 건에 대한 학생, 강의, 강사 이름
+강사까지 가는 JOIN 경로 = enrollments -> courses -> instructors
 ```
 
 ```sql
-
+SELECT
+    e.id AS enrollment_id,
+    s.name AS student_name,
+    c.title AS course_title,
+    i.name AS instructor_name,
+    e.status,
+    e.recorded_amount,
+    e.enrolled_at
+FROM course_project.enrollments AS e
+JOIN course_project.students AS s
+    ON e.student_id = s.id
+JOIN course_project.courses AS c
+    ON e.course_id = c.id
+JOIN course_project.instructors AS i
+    ON c.instructor_id = i.id
+ORDER BY e.id;
 ```
 
 실제 행 수:
 
 ```text
-
+5행
 ```
 
 ### 증거 화면
@@ -176,7 +202,7 @@ JOIN 경로 =
 assignments/chapter08/images/step03_inner_join.png
 ```
 
-`여기에 다중 JOIN 결과 화면을 삽입하세요.`
+<img width="1372" height="974" alt="image" src="https://github.com/user-attachments/assets/f81a087b-a56a-4e1f-bdf6-ea8473e37af0" />
 
 ---
 
@@ -190,23 +216,32 @@ assignments/chapter08/images/step03_inner_join.png
 
 ```text
 결과 한 행 = 강의 한 개
-강의 303의 예상 실제 신청 수 =
-강의 303의 예상 고유 학생 수 =
-강의 303의 예상 recorded_amount =
+강의 303의 예상 실제 신청 수 = 0건
+강의 303의 예상 고유 학생 수 = 0건
+강의 303의 예상 recorded_amount = 0
 ```
 
 내 SQL:
 
 ```sql
-
+SELECT
+    c.id,
+    c.title,
+    COUNT(e.id) AS non_cancelled_count
+FROM course_project.courses AS c
+LEFT JOIN course_project.enrollments AS e
+    ON c.id = e.course_id
+   AND e.status <> '취소'
+GROUP BY c.id, c.title
+ORDER BY c.id;
 ```
 
 실제 결과:
 
 ```text
-강의 301:
-강의 302:
-강의 303:
+강의 301:2
+강의 302:2
+강의 303:0
 ```
 
 ## 4-2. `COUNT(*)`와 `COUNT(e.id)` 비교
@@ -214,21 +249,21 @@ assignments/chapter08/images/step03_inner_join.png
 강의 303을 기준으로 작성합니다.
 
 ```text
-COUNT(*) 결과:
-COUNT(e.id) 결과:
-COUNT(DISTINCT e.student_id) 결과:
+COUNT(*) 결과: 1
+COUNT(e.id) 결과: 0
+COUNT(DISTINCT e.student_id) 결과: 0
 ```
 
 ### 왜 `COUNT(*) = 1`인데 실제 신청 수는 0일 수 있나요?
 
 ```text
-
+LEFT JOIN은 연결되는 신청이 없어도 강의 303의 행을 결과에 남긴다. 이때 오른쪽 신청 정보는 NULL인 행 하나로 표시되므로 COUNT(*)는 그 행을 세어 1이 된다. 반면 COUNT(e.id)는 NULL이 아닌 신청 ID만 세므로 0이다.
 ```
 
 ### 자식 사건 수를 셀 때 `COUNT(child.id)`가 더 적절한 이유
 
 ```text
-
+LEFT JOIN 결과에는 실제 자식 행이 없어도 부모 행이 남을 수 있다. COUNT(*)는 그 부모 행까지 세지만, COUNT(child.id)는 실제로 연결된 자식 행만 세기 때문이다.
 ```
 
 ---
@@ -241,32 +276,54 @@ COUNT(DISTINCT e.student_id) 결과:
 
 ```sql
 
+SELECT
+    s.id,
+    s.name,
+    COUNT(e.id) AS non_cancelled_count
+FROM course_project.students AS s
+LEFT JOIN course_project.enrollments AS e
+    ON s.id = e.student_id
+   AND e.status <> '취소'
+GROUP BY s.id, s.name
+ORDER BY s.id;
+
 ```
 
 ```text
-결과 학생 수:
-박서연 포함 여부:
+결과 학생 수: 3명
+박서연 포함 여부: 포함된다.
 ```
 
 ## 5-2. 조건을 `WHERE`에 둔 경우
 
 ```sql
 
+SELECT
+    s.id,
+    s.name,
+    COUNT(e.id) AS non_cancelled_count
+FROM course_project.students AS s
+LEFT JOIN course_project.enrollments AS e
+    ON s.id = e.student_id
+WHERE e.status <> '취소'
+GROUP BY s.id, s.name
+ORDER BY s.id;
+
 ```
 
 ```text
-결과 학생 수:
-박서연 포함 여부:
+결과 학생 수: 2명
+박서연 포함 여부: 포함되지 않는다. 
 ```
 
 ## 5-3. 차이 설명
 
 ```text
-ON 조건이 LEFT JOIN의 오른쪽 연결 대상을 제한하는 방식:
+ON 조건이 LEFT JOIN의 오른쪽 연결 대상을 제한하는 방식: 왼쪽 행을 유지하면서 JOIN 대상만을 제한한다. 
+WHERE 조건이 JOIN 이후 결과 행을 제거하는 방식: JOIN 결과가 만들어진 이후, 참이 아닌 행을 제거한다. 
 
-WHERE 조건이 JOIN 이후 결과 행을 제거하는 방식:
-
-이번 사례에서 ON = 3명, WHERE = 2명이 되는 이유:
+이번 사례에서 ON = 3명, WHERE = 2명이 되는 이유: '박서연'은 취소 제외 신청을 가지지 않는다. 따라서, JOIN을 하는 경우 오른쪽 행이 e.status가 NULL이 된다.
+ON 조건을 사용하는 경우, NULL이더라도 왼쪽 행이 유지된다. 따라서, 전체 학생 수인 3명으로 조회된다. 그러나 WHERE 조건을 사용하는 경우, 오른쪽 행이 NULL이라면, 참으로 평가되지 않기 때문에 제거될 것이다. 즉 '박서연'이 제거되어 2명으로 조회될 것이다. 
 ```
 
 ---
@@ -276,26 +333,46 @@ WHERE 조건이 JOIN 이후 결과 행을 제거하는 방식:
 ## 방법 1. `LEFT JOIN ... IS NULL`
 
 ```sql
+SELECT
+    s.id,
+    s.name,
+    s.email
+FROM course_project.students AS s
+LEFT JOIN course_project.enrollments AS e
+    ON s.id = e.student_id
+   AND e.status <> '취소'
+WHERE e.id IS NULL;
 
 ```
 
 ## 방법 2. `NOT EXISTS`
 
 ```sql
+SELECT
+    s.id,
+    s.name,
+    s.email
+FROM course_project.students AS s
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM course_project.enrollments AS e
+    WHERE e.student_id = s.id
+      AND e.status <> '취소'
+);
 
 ```
 
 ```text
-방법 1 결과:
-방법 2 결과:
-두 결과가 같은가:
-찾아진 학생:
+방법 1 결과: 103/박서연/seoyeon@example.com
+방법 2 결과: 103/박서연/seoyeon@example.com
+두 결과가 같은가: 네
+찾아진 학생: 박서연
 ```
 
 ### 두 방식의 공통 의미를 자신의 말로 설명
 
 ```text
-
+두 방법 모두 취소되지 않은 수강신청이 하나도 없는 학생을 찾는다. LEFT JOIN 방식은 연결된 신청 ID가 NULL인 학생을 찾고, NOT EXISTS 방식은 조건에 맞는 신청이 존재하지 않는 학생을 찾는다.
 ```
 
 ---
