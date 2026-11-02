@@ -60,7 +60,7 @@ enrollments = 5
 ### 기준값이 다르면 그대로 진행하면 안 되는 이유
 
 ```text
-
+기준값이 예상과 다르면 데이터가 추가, 변경되었거나 정상적이지 않은 상태일 수 있다. 따라서, 이후 단계의 조회 결과가 잘못 나타나거나, 데이터가 중복되거나 누락될 수 있다. 따라서, 기준 상태와 동일하게 맞추고 진행해야 한다.
 ```
 
 ### 증거 화면
@@ -87,10 +87,10 @@ assignments/chapter08/images/step01_prerequisite.png
 포함 상태: 신청, 수강중, 완료
 제외 상태: 취소
 JOIN할 테이블: courses, enrollments
-JOIN 경로:
+JOIN 경로: courses.id = enrollments.course_id
 INNER JOIN / LEFT JOIN 선택: LEFT JOIN
-그 이유:  
-예상 행 수:
+그 이유: 취소 제외 신청이 0건인 강의도 결과에 포함해 0건으로 보여야 하기 때문이다.  
+예상 행 수: 3행
 ```
 
 ## 질문 B
@@ -101,9 +101,9 @@ INNER JOIN / LEFT JOIN 선택: LEFT JOIN
 포함 상태: 신청, 수강중, 완료
 제외 상태: 취소
 JOIN할 테이블:students, enrollments
-JOIN 경로: 
-집계 대상:
-예상 결과:
+JOIN 경로: students.id = enrollments.student_id
+집계 대상: 취소 제외 수강신청의 ID
+예상 결과: 3행, 2건/2건/0건
 ```
 
 ## 질문 C
@@ -115,7 +115,7 @@ JOIN 경로:
 제외 상태: 취소
 0건인 부모도 보여야 하는가: 보여야 한다. 강사는 존재하지만, 취소되지 않은 신청 수가 0건인 강사가 존재할 수 있다. 이런 경우, 단순 LEFT JOIN을 한다면, 어떤 강사는 '취소되지 않은 신청'을 가지지 않아 누락될 수 있다. 누락이 되지 않도록 하는 것이 적절하므로, 0건인 부모도 보이도록 한다. 
 NULL을 어떻게 해석할 것인가: 원본 강사 테이블에 저장된 값으로 해석해서는 안된다. 이는 JOIN 조건에 맞는 오른쪽 행이 없어서 결과 과정에서 생성된 NULL 이라고 해석해야 한다.
-예상 결과:
+예상 결과: 4건/0건
 ```
 
 ---
@@ -275,7 +275,6 @@ LEFT JOIN 결과에는 실제 자식 행이 없어도 부모 행이 남을 수 �
 ## 5-1. 조건을 `ON`에 둔 경우
 
 ```sql
-
 SELECT
     s.id,
     s.name,
@@ -286,7 +285,6 @@ LEFT JOIN course_project.enrollments AS e
    AND e.status <> '취소'
 GROUP BY s.id, s.name
 ORDER BY s.id;
-
 ```
 
 ```text
@@ -297,7 +295,6 @@ ORDER BY s.id;
 ## 5-2. 조건을 `WHERE`에 둔 경우
 
 ```sql
-
 SELECT
     s.id,
     s.name,
@@ -308,7 +305,6 @@ LEFT JOIN course_project.enrollments AS e
 WHERE e.status <> '취소'
 GROUP BY s.id, s.name
 ORDER BY s.id;
-
 ```
 
 ```text
@@ -342,7 +338,6 @@ LEFT JOIN course_project.enrollments AS e
     ON s.id = e.student_id
    AND e.status <> '취소'
 WHERE e.id IS NULL;
-
 ```
 
 ## 방법 2. `NOT EXISTS`
@@ -359,7 +354,6 @@ WHERE NOT EXISTS (
     WHERE e.student_id = s.id
       AND e.status <> '취소'
 );
-
 ```
 
 ```text
