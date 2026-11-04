@@ -658,44 +658,70 @@ Chapter 07에서 작성한 개인 프로젝트를 사용합니다.
 
 | 질문 ID | 업무 질문 | 결과 한 행 | 포함/제외 범위 | JOIN 경로 | 집계 대상 | 검산 방법 |
 | --- | --- | --- | --- | --- | --- | --- |
-| P08-Q01 |  |  |  |  |  |  |
-| P08-Q02 |  |  |  |  |  |  |
-| P08-Q03 |  |  |  |  |  |  |
+| P08-Q01 | 회원별 배송된 상품 수량은 얼마인가? | 회원 한 명 | 기록된 전체 배송 건 포함 | members -> subscription -> shipment -> shipment_items | shipment_items.quantity | 회원별 배송 상품 수량을 직접 더해 비교한다. |
+| P08-Q02 | 업체별 등록 상품 수와 평균 가격은 얼마인가? | 업체 한 곳 | 등록된 전체 상품 | factory -> items | item.price의 평균, factory | 업체별로 등록된 상품 내역을 직접 확인하고, 그 가격의 평균을 구해서 비교한다. |
+| P08-Q03 | 가입 목적 별, 목적이 변경되지 않은 회원 수는 몇명인가? | 목적 한 개 | 현재 해당 목적으로 기록된 회원 (변경되거나, 취소된 목적인 경우 제외한다) | purpose -> member_purpose | member_purpose | 목적 별 회원 목록에서 현재 목적이라고 명시된 회원에 대해 직접 세어 비교한다. |
 
 ## 12-1. 질문 1 SQL
 
 ```sql
-
+SELECT
+    m.id AS member_id,
+    COALESCE(SUM(si.quantity), 0) AS shipped_item_quantity
+FROM members AS m
+LEFT JOIN subscription AS s
+    ON m.id = s.member_id
+LEFT JOIN shipment AS sh
+    ON s.id = sh.subscription_id
+LEFT JOIN shipment_items AS si
+    ON sh.id = si.shipment_id
+GROUP BY m.id
+ORDER BY m.id;
 ```
 
 ```text
-예상 결과:
-실제 결과:
-검산 결과:
+예상 결과: 회원별 배송 상품 수량 합계가 표시된다. 배송 상품이 없는 회원은 0이다.
+실제 결과: 미실행
+검산 결과: 미실행
 ```
 
 ## 12-2. 질문 2 SQL
 
 ```sql
-
+SELECT
+    f.id AS factory_id,
+    COUNT(i.id) AS item_count,
+    AVG(i.price) AS average_item_price
+FROM factory AS f
+LEFT JOIN items AS i
+    ON f.id = i.factory_id
+GROUP BY f.id
+ORDER BY f.id;
 ```
 
 ```text
-예상 결과:
-실제 결과:
-검산 결과:
+예상 결과: 업체별 상품 수와 평균 상품 가격이 표시된다. 
+실제 결과: 미실행
+검산 결과: 미실행
 ```
 
 ## 12-3. 질문 3 SQL
 
 ```sql
-
+SELECT
+    p.id AS purpose_id,
+    COUNT(DISTINCT mp.member_id) AS member_count
+FROM purpose AS p
+LEFT JOIN member_purposes AS mp
+    ON p.id = mp.purpose_id
+GROUP BY p.id
+ORDER BY p.id;
 ```
 
 ```text
-예상 결과:
-실제 결과:
-검산 결과:
+예상 결과: 목적별로 그 목적을 기록한 고유 회원 수가 표시된다. 다만, 변경되었거나 취소된 회원인 경우 집계하지 않는다. 
+실제 결과: 미실행
+검산 결과: 미실행
 ```
 
 > 아직 개인 프로젝트 테이블을 PostgreSQL로 완성하지 않았다면 SQL 초안과 예상 검산 방법까지만 작성하고 `미실행`이라고 명시합니다.
@@ -707,6 +733,59 @@ Chapter 07에서 작성한 개인 프로젝트를 사용합니다.
 ## 13-1. 내가 AI에게 전달한 질문
 
 ```text
+나는 데이터베이스를 처음 배우는 학생이야.
+이전에 도시락 정기 배송 프로젝트를 발전시키려고 해.
+확정되지 않은 업무 규칙을 확정짓지 말고, 지금까지 결정된 내용만을 바탕으로 알려줘.
+
+아직 프로젝트 테이블이 만들어지지 않은 상황에서, 앞으로 어떻게 프로젝트를 구성할지에 대해 미리 고안한 내용이야.
+다음의 작성된 내용을 보고 결과 한 행, 상태 범위, JOIN 경로, INNER'LEFT 선택, COUNT 대상에 대해 검토해줘.
+그리고, 과대 집계 위험이 있는지, 검산은 어떻게 할 수 있는지 방법 알려줘.
+
+처음 배우는 학생이 이해하기 쉽게 알려줘.
+다음은 현재까지 작성한 내용이야.
+
+| P08-Q01 | 회원별 배송된 상품 수량은 얼마인가? | 회원 한 명 | 기록된 전체 배송 건 포함 | members -> subscription -> shipment -> shipment_items | shipment_items.quantity | 회원별 배송 상품 수량을 직접 더해 비교한다. |
+| P08-Q02 | 업체별 등록 상품 수와 평균 가격은 얼마인가? | 업체 한 곳 | 등록된 전체 상품 | factory -> items | item.price의 평균, factory | 업체별로 등록된 상품 내역을 직접 확인하고, 그 가격의 평균을 구해서 비교한다. |
+| P08-Q03 | 가입 목적 별, 목적이 변경되지 않은 회원 수는 몇명인가? | 목적 한 개 | 현재 해당 목적으로 기록된 회원 (변경되거나, 취소된 목적인 경우 제외한다) | purpose -> member_purpose | member_purpose | 목적 별 회원 목록에서 현재 목적이라고 명시된 회원에 대해 직접 세어 비교한다. |
+
+## 12-1. 질문 1 SQL
+
+```sql
+SELECT
+    m.id AS member_id,
+    COALESCE(SUM(si.quantity), 0) AS shipped_item_quantity
+FROM members AS m
+LEFT JOIN subscription AS s
+    ON m.id = s.member_id
+LEFT JOIN shipment AS sh
+    ON s.id = sh.subscription_id
+LEFT JOIN shipment_items AS si
+    ON sh.id = si.shipment_id
+GROUP BY m.id
+ORDER BY m.id;
+
+## 12-2. 질문 2 SQL
+```sql
+SELECT
+    f.id AS factory_id,
+    COUNT(i.id) AS item_count,
+    AVG(i.price) AS average_item_price
+FROM factory AS f
+LEFT JOIN items AS i
+    ON f.id = i.factory_id
+GROUP BY f.id
+ORDER BY f.id;
+
+## 12-3. 질문 3 SQL
+```sql
+SELECT
+    p.id AS purpose_id,
+    COUNT(DISTINCT mp.member_id) AS member_count
+FROM purpose AS p
+LEFT JOIN member_purposes AS mp
+    ON p.id = mp.purpose_id
+GROUP BY p.id
+ORDER BY p.id;
 
 ```
 
@@ -714,24 +793,29 @@ Chapter 07에서 작성한 개인 프로젝트를 사용합니다.
 
 | 검토 항목 | 내 판단/SQL | AI 제안 | 최종 선택 | 이유 |
 | --- | --- | --- | --- | --- |
-| 결과 한 행 |  |  |  |  |
-| 상태 범위 |  |  |  |  |
-| JOIN 경로 |  |  |  |  |
-| INNER/LEFT 선택 |  |  |  |  |
-| COUNT 대상 |  |  |  |  |
-| 과대 집계 위험 |  |  |  |  |
-| 상세 검산 방법 |  |  |  |  |
+| 결과 한 행 | 	Q1: 회원 한 명, Q2: 업체 한 곳, Q3: 목적 한 개 | 모두 적절하다고 제안받음. | 수용 | 한 행의 의미를 재정의 할 것을 제안 받지 않았기 때문이다. |
+| 상태 범위 | Q1: 기록된 전체 배송 건, Q2: 등록된 전체 상품, Q3: 현재 목적이며 변경·취소된 목적은 제외 | Q1은 전체 배송 기록에 미배송·취소가 포함될 수 있다고 확인. Q3은 SQL에 현재·취소 여부 조건이 없음 | Q1은 배송 상태 고려하지 않은, 전체 배송건으로 확정함, Q3는 회원과 목적 테이블의 연결 과정에서 현재 목적인지, 변경된 목적일지를 어떻게 관리할지를 확정해야할 것이라고 판단함. 목적의 상태를 목적, 취소로 구분하여 관리하기로 결정함. 이를 반영하여 다시 작성하기로 결정함. | Q1의 경우 질문이 명확히 설정되지 않았다고 생각되어, 이를 구체화하였다. Q3의 경우 목적 상태 관리 방안이 명확하지 않았다고 생각하여, 이를 구체화하였다. |
+| JOIN 경로 | Q1: members -> subscription -> shipment -> shipment_items, Q2: factory -> items, Q3: purpose -> member_purposes | 모두 적절하다고 제안받음. | 수용 | 수정할 것을 제안 받지 않았기 때문이다. |
+| INNER/LEFT 선택 | 모두 LEFT | 부모 행도 결과에 남겨야 하므로 적절하다고 제안받음. | LEFT JOIN 유지 | 수정할 것을 제안 받지 않았기 때문이다. |
+| COUNT 대상 | Q1: shipment_items의 상품 수량, Q2: 업체 별 상품 id, Q3: 목적 별 회원 id | Q1에서 상품 행 개수가 아니라 수량의 합을 표현하고 있어 수정이 필요하다고 제안받음. | 수정 | AI가 지적한 문제는 어떤 상태를 기준으로 집계할지 명확히 설정하지 않았을 때인데, Q1에 대해서는 배송 상태를 고려하지 않고, 전체 배송 건으로 집계하고자 결정하였기 때문이다. |
+| 과대 집계 위험 | - | 현재 경로에서 단정하기 어렵다고 제시했음. | 수용 | 수정할 내용이 없었기 때문이다. |
+| 상세 검산 방법 | 직접 배송 상품, 업체 별 상품, 목적 별 회원을 세어본다. | 각 질문에서 한 대상의 원본 내역을 조회해 직접 계산한 값과 비교할 것을 제안받음. | 수용 | 구체적으로 어떻게 확인할 것인지에 대한 제안이기 때문에 수용하였다. |
 
 ### AI가 만든 SQL에서 발견한 위험 또는 확인한 점
 
 ```text
+Q1은 “배송된 상품”이라고 표현했지만 SQL은 기록된 모든 배송 건을 합산한다고 제안받았다.
+이에, 배송 상태와 관련 없이 합하도록 수정하였다. 
 
+Q2는 달리 제안받은 내용이 없다.
+
+Q3는 작성된 질문과 SQL이 상이하다는 것을 지적받았다. 현재 목적만 세고 변경·취소된 목적은 제외한다고 했지만,SQL에 현재 여부나 취소 여부를 가리는 조건이 없었다. 이에, 먼저 목적에 대한 상태를 어떻게 관리할지부터 명확히 하지 않았다는 문제점을 발견하였다. 따라서, member_purposes 에서 목적의 상태를 목적, 취소로 관리하기로 결정하였다. 또한, 이 중 '목적' 상태만을 집계하도록 수정하고자 한다. 
 ```
 
 ### AI SQL이 실행 성공했다고 바로 정답이라고 할 수 없는 이유
 
 ```text
-
+SQL이 실행된다는 것은 문법과 조건에 맞았다는 것일 뿐, 업무 질문에 맞도록 표현했음이 보장되는 것은 아니다. 아직 확정되지 않은 규칙 때문에 문제가 생겼거나, JOIN과정에서 같은 데이터가 반복되는 등 오류가 발생했을 수 있다. 따라서, 원본 자료를 직접 확인하는 것, SQL의 범위와 업무 기준이 맞는지 확인하는 것이 필요하다.
 ```
 
 ---
@@ -742,19 +826,17 @@ Chapter 07에서 작성한 개인 프로젝트를 사용합니다.
 
 ```text
 1. JOIN SQL을 작성하기 전에 가장 먼저 정해야 하는 것은
-   ____________________________________________________________ 이다.
+   결과 한 행이 무엇을 의미하는지이다.
 
-2. LEFT JOIN에서 COUNT(*) 대신 COUNT(child.id)를 검토해야 하는 이유는
-   ____________________________________________________________ 이다.
+2. LEFT JOIN에서 COUNT(*) 대신 COUNT(child.id)를 검토해야 하는 이유는 양 자의 결괏값이 실제 연결된 자식 행이 있는지, 없는지에 따라 달라지기 때문이다. COUNT(*)는 자식행이 없는 경우에도 부모행은 결과에 남지만, COUNT(child.id)는 연결이 있는 경우에만 센다. 따라서, 확인하고자 하는 값이 무엇인지에 따라 적절히 선택해야하기 때문이다. 
 
-3. ON과 WHERE 조건 위치가 중요한 이유는
-   ____________________________________________________________ 이다.
+3. ON과 WHERE 조건 위치가 중요한 이유는 LEFT JOIN에서 ON과 WHERE의 조건 위치에 따라 자식행이 없는 부모를 제외하는지 아닌지가 달라지기 떄문이다. ON을 활용하는 경우, 자식행이 없는 경우에도 부모는 제외되지 않지만, WHERE은 자식행이 없는 부모가 제외될 수 있다. 따라서, 어떤 행을 남기고자 했는지에 따라 적절히 선택해야하기 때문이다.
 
 4. 여러 1:N 관계를 JOIN한 뒤 바로 SUM하면 위험한 이유는
-   ____________________________________________________________ 이다.
+   관계가 어떻게 설정되어있는지에 따라, 같은 값이 반복될 수 있다. 이에 따라 합계가 실제보다 커질 수 있기 때문이다.
 
 5. 집계 결과를 신뢰하기 전에 가장 좋은 검산 방법 중 하나는
-   ____________________________________________________________ 이다.
+   집계 대상의 행을 직접 조회하여, 집계 결과와 비교하는 이다.
 ```
 
 ---
