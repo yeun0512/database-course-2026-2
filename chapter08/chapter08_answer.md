@@ -385,21 +385,21 @@ WHERE NOT EXISTS (
 ## 7-1. 전체 평균 `recorded_amount`
 
 ```text
-예상 평균:
-실제 평균:
+예상 평균:118000
+실제 평균:118000
 ```
 
 ## 7-2. 취소 제외 평균
 
 ```text
-예상 평균:
-실제 평균:
+예상 평균:110000
+실제 평균:110000
 ```
 
 ### `recorded_amount`를 실제 회계 매출이라고 부르면 안 되는 이유
 
 ```text
-
+이는 신청 시점에 기록한 금액이다. 따라서, 실제로 결제까지 성공했는지, 환불 등 취소되지는 않았는지를 고려하는 것은 아니다. 따라서, 실제 회계 매출이라고 부르면 안 된다.
 ```
 
 ---
@@ -409,37 +409,60 @@ WHERE NOT EXISTS (
 ## 8-1. 상태별 신청 건수
 
 ```sql
-
+SELECT
+    status,
+    COUNT(*) AS enrollment_count,
+    SUM(recorded_amount) AS total_recorded_amount
+FROM course_project.enrollments
+GROUP BY status
+ORDER BY CASE status
+    WHEN '신청' THEN 1
+    WHEN '수강중' THEN 2
+    WHEN '완료' THEN 3
+    WHEN '취소' THEN 4
+    ELSE 99
+END;
 ```
 
 결과:
 
 ```text
-신청:
-수강중:
-완료:
-취소:
-상태별 합계:
+신청:2
+수강중:1
+완료:1
+취소:1
+상태별 합계:5
 ```
 
 ### 상태별 건수 합이 전체 신청 5건과 맞는지 검산
 
 ```text
-
+2+1+1+1=5로, 전체 신청 5건과 같다. 
 ```
 
 ## 8-2. 강의별 취소 제외 신청 수와 금액
 
 ```sql
-
+SELECT
+    c.id AS course_id,
+    c.title AS course_title,
+    COUNT(e.id) AS non_cancelled_count,
+    COUNT(DISTINCT e.student_id) AS student_count,
+    COALESCE(SUM(e.recorded_amount), 0) AS non_cancelled_recorded_amount
+FROM course_project.courses AS c
+LEFT JOIN course_project.enrollments AS e
+    ON c.id = e.course_id
+   AND e.status <> '취소'
+GROUP BY c.id, c.title
+ORDER BY c.id;
 ```
 
 ```text
-강의 301:
-강의 302:
-강의 303:
-강의별 합계를 다시 더한 값:
-전체 취소 제외 기준 440000과 일치 여부:
+강의 301:2
+강의 302:2
+강의 303:0
+강의별 합계를 다시 더한 값:4
+전체 취소 제외 기준 440000과 일치 여부:일치한다.
 ```
 
 ## 8-3. `HAVING` 사용
@@ -447,12 +470,22 @@ WHERE NOT EXISTS (
 취소 제외 신청이 2건 이상인 강의를 조회합니다.
 
 ```sql
-
+SELECT
+    c.id,
+    c.title,
+    COUNT(e.id) AS enrollment_count
+FROM course_project.courses AS c
+JOIN course_project.enrollments AS e
+    ON c.id = e.course_id
+WHERE e.status <> '취소'
+GROUP BY c.id, c.title
+HAVING COUNT(e.id) >= 2
+ORDER BY c.id;
 ```
 
 ```text
-예상 강의 수:
-실제 강의 수:
+예상 강의 수:2
+실제 강의 수:2
 ```
 
 ---
@@ -464,11 +497,21 @@ WHERE NOT EXISTS (
 ## 9-1. 신청까지 JOIN해서 잘못 집계한 결과
 
 ```sql
-
+SELECT
+    i.id AS instructor_id,
+    i.name AS instructor_name,
+    SUM(c.price) AS wrong_course_price_sum
+FROM course_project.instructors AS i
+JOIN course_project.courses AS c
+    ON i.id = c.instructor_id
+JOIN course_project.enrollments AS e
+    ON c.id = e.course_id
+GROUP BY i.id, i.name
+ORDER BY i.id;
 ```
 
 ```text
-강사 201 잘못된 가격 합계:
+강사 201 잘못된 가격 합계: 440000
 ```
 
 본문 기준:
@@ -480,11 +523,19 @@ WHERE NOT EXISTS (
 ## 9-2. 강의 수준에서 올바르게 집계
 
 ```sql
-
+SELECT
+    i.id AS instructor_id,
+    i.name AS instructor_name,
+    COALESCE(SUM(c.price), 0) AS course_price_sum
+FROM course_project.instructors AS i
+LEFT JOIN course_project.courses AS c
+    ON i.id = c.instructor_id
+GROUP BY i.id, i.name
+ORDER BY i.id;
 ```
 
 ```text
-강사 201 올바른 가격 합계:
+강사 201 올바른 가격 합계:220000
 ```
 
 본문 기준:
@@ -496,15 +547,15 @@ WHERE NOT EXISTS (
 ## 9-3. 왜 두 결과가 달라졌나요?
 
 ```text
-JOIN 전 강의 행 수:
-JOIN 후 강의가 반복된 이유:
-SUM이 무엇을 반복해서 더했는가:
+JOIN 전 강의 행 수: 3개 
+JOIN 후 강의가 반복된 이유: 각 강의의 신청 개수 (신청 행 수)만큼, 각 강의가 반복되기 때문이다. 
+SUM이 무엇을 반복해서 더했는가: 신청이 여러 건 있는 강의의 경우, 신청 행마다 강의 가격을 반복해서 더했다. 
 ```
 
 ### `SUM(DISTINCT c.price)`를 일반적인 해결책으로 사용하면 안 되는 이유
 
 ```text
-
+SUM(DISTINCT c.price)는 강의 행을 구별하는 것이 아니라 가격 값의 중복을 제거하는 것이다. 서로 다른 두 강의의 가격이 같으면 실제로 두 강의의 가격은 합산 되어야 함에도, 제거될 수 있다. 따라서, 강의 가격 합계를 구하려면 신청 테이블과 JOIN하지 않고 강의 수준에서 집계해야 한다.
 ```
 
 ### 증거 화면
@@ -515,7 +566,9 @@ SUM이 무엇을 반복해서 더했는가:
 assignments/chapter08/images/step09_over_aggregation.png
 ```
 
-`여기에 잘못된 합계와 올바른 합계를 비교한 화면을 삽입하세요.`
+<img width="1150" height="947" alt="image" src="https://github.com/user-attachments/assets/ba13289b-0b32-4e5a-9e15-ffd7c0346f6a" />
+
+<img width="1164" height="956" alt="image" src="https://github.com/user-attachments/assets/f5d96629-6e5e-4656-8ded-fdd669381dbf" />
 
 ---
 
@@ -524,38 +577,51 @@ assignments/chapter08/images/step09_over_aggregation.png
 강의 하나를 선택합니다.
 
 ```text
-선택한 course_id:
-강의 제목:
+선택한 course_id:301
+강의 제목:데이터베이스 입문
 ```
 
 ## 10-1. 상세 신청 행 조회
 
 ```sql
-
+SELECT
+    e.id AS enrollment_id,
+    e.student_id,
+    e.status,
+    e.recorded_amount
+FROM course_project.enrollments AS e
+WHERE e.course_id = 301
+  AND e.status <> '취소'
+ORDER BY e.id;
 ```
 
 ```text
-상세 행 수:
-상세 recorded_amount를 직접 더한 값:
+상세 행 수:2
+상세 recorded_amount를 직접 더한 값:100000+100000=200000
 ```
 
 ## 10-2. 집계 SQL
 
 ```sql
-
+SELECT
+    COUNT(*) AS enrollment_count,
+    SUM(recorded_amount) AS total_recorded_amount
+FROM course_project.enrollments
+WHERE course_id = 301
+  AND status <> '취소';
 ```
 
 ```text
-집계 건수:
-집계 금액:
+집계 건수:2
+집계 금액:200000
 ```
 
 ## 10-3. 비교
 
 ```text
-상세 행 수와 COUNT 결과 일치 여부:
-상세 금액 합과 SUM 결과 일치 여부:
-다르다면 원인:
+상세 행 수와 COUNT 결과 일치 여부: 일치한다.
+상세 금액 합과 SUM 결과 일치 여부: 일치한다. 
+다르다면 원인: 일치한다. 
 ```
 
 ---
@@ -569,7 +635,7 @@ code/chapter08/03_join_aggregation_validation.sql
 ```
 
 ```text
-최종 검증 메시지:
+최종 검증 메시지:Chapter 08 join and aggregation validation passed
 ```
 
 기대 메시지:
@@ -581,7 +647,7 @@ Chapter 08 join and aggregation validation passed
 ### 자동 검증이 통과했어도 사람이 SQL 의미를 설명해야 하는 이유
 
 ```text
-
+자동 검증은 정해진 데이터와 조건에서 결과가 예상된 것과 맞는지 확인한다. 그러나, 구체적으로 어떤 행을 세고 더하는지, JOIN과정에서 행이 잘못 세어지도록 나타나지는 않는지, 조건이 업무 규칙에 맞는지 확인하는 것이 필요하다. 따라서, 통과 이후에도 사람이 SQL 의미를 설명할 수 있어야 한다.
 ```
 
 ---
