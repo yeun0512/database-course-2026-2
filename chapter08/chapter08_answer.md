@@ -843,25 +843,25 @@ SQL이 실행된다는 것은 문법과 조건에 맞았다는 것일 뿐, 업�
 
 # 15. 제출 체크리스트
 
-- [ ] `chapter08_answer.md`를 본인 저장소에 만들었다.
-- [ ] `00_check_course_project.sql`이 통과했다.
-- [ ] 업무 질문마다 결과 한 행을 먼저 정의했다.
-- [ ] INNER JOIN과 다중 JOIN을 실행했다.
-- [ ] LEFT JOIN에서 0건 부모를 확인했다.
-- [ ] `COUNT(*)`와 `COUNT(child.id)` 차이를 설명했다.
-- [ ] ON과 WHERE 조건 위치 차이를 직접 비교했다.
-- [ ] `LEFT JOIN ... IS NULL`과 `NOT EXISTS`를 비교했다.
-- [ ] 전체/활성/취소 제외 기준값을 직접 검산했다.
-- [ ] `GROUP BY`, `HAVING`을 사용했다.
-- [ ] 과대 집계 오류와 수정 결과를 비교했다.
-- [ ] 상세 결과와 집계 결과를 교차 검산했다.
-- [ ] `03_join_aggregation_validation.sql`이 통과했다.
-- [ ] 개인 프로젝트 업무 질문 3개를 작성했다.
-- [ ] AI SQL을 실행 성공 여부가 아니라 의미와 검산 결과로 평가했다.
-- [ ] 핵심 캡처는 3~4장 정도만 사용했다.
-- [ ] 비밀번호·개인정보·비밀정보가 없다.
-- [ ] GitHub 웹에서 Markdown과 이미지가 정상적으로 보인다.
-- [ ] 최종 답안을 commit/push했다.
+- [0] `chapter08_answer.md`를 본인 저장소에 만들었다.
+- [0] `00_check_course_project.sql`이 통과했다.
+- [0] 업무 질문마다 결과 한 행을 먼저 정의했다.
+- [0] INNER JOIN과 다중 JOIN을 실행했다.
+- [0] LEFT JOIN에서 0건 부모를 확인했다.
+- [0] `COUNT(*)`와 `COUNT(child.id)` 차이를 설명했다.
+- [0] ON과 WHERE 조건 위치 차이를 직접 비교했다.
+- [0] `LEFT JOIN ... IS NULL`과 `NOT EXISTS`를 비교했다.
+- [0] 전체/활성/취소 제외 기준값을 직접 검산했다.
+- [0] `GROUP BY`, `HAVING`을 사용했다.
+- [0] 과대 집계 오류와 수정 결과를 비교했다.
+- [0] 상세 결과와 집계 결과를 교차 검산했다.
+- [0] `03_join_aggregation_validation.sql`이 통과했다.
+- [0] 개인 프로젝트 업무 질문 3개를 작성했다.
+- [-] AI SQL을 실행 성공 여부가 아니라 의미와 검산 결과로 평가했다.
+- [0] 핵심 캡처는 3~4장 정도만 사용했다.
+- [0] 비밀번호·개인정보·비밀정보가 없다.
+- [0] GitHub 웹에서 Markdown과 이미지가 정상적으로 보인다.
+- [0] 최종 답안을 commit/push했다.
 
 ---
 
@@ -876,7 +876,7 @@ https://github.com/<본인-GitHub-ID>/<본인-저장소>/blob/main/assignments/c
 내 제출 URL:
 
 ```text
-
+https://github.com/yeun0512/database-course-2026-2/edit/main/chapter08/chapter08_answer.md
 ```
 
 > 저장소 메인 URL, 교수자 템플릿 URL, Raw URL이 아니라 **작성 완료된 본인 `chapter08_answer.md` 파일 화면 URL**을 제출합니다.
