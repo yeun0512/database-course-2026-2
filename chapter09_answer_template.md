@@ -11,9 +11,9 @@
 이 파일과 캡처 화면에는 실제 비밀번호, 전체 DB 접속 URL, API Key, 개인정보를 기록하지 않습니다.
 
 ```text
-GitHub 계정 또는 별칭:
-과제 작성일:
-사용한 AI 도구:
+GitHub 계정 또는 별칭: yeun0512
+과제 작성일: 2026.11.11
+사용한 AI 도구: GPT
 ```
 
 ---
@@ -32,11 +32,11 @@ SHOW transaction_read_only;
 
 | 확인 항목 | 실제 결과 | 의미 |
 | --- | --- | --- |
-| `current_database()` |  |  |
-| `current_user` |  |  |
-| `current_schema()` |  |  |
-| `search_path` |  |  |
-| `transaction_read_only` |  |  |
+| `current_database()` | ai_database_book | 현재 ai_database_book 데이터베이스에 연결되어 있다. |
+| `current_user` | postgres | 현재 사용자가 postgres이다. |
+| `current_schema()` | public | 기본 스키마가 public이다. |
+| `search_path` | public, "$user" | 테이블을 찾을 때 먼저 public을 확인하고, 그다음 사용자 이름과 같은 스키마를 확인한다. |
+| `transaction_read_only` | off | 읽기 전용 모드가 아니고, 데이터 변경이 가능하다. |
 
 Chapter 07·08 기준값:
 
@@ -53,7 +53,7 @@ enrollments = 5
 ### 기준 상태가 다르면 Chapter 09를 계속 진행하면 안 되는 이유
 
 ```text
-
+기준 상태가 다르면 SQL에 오류가 있었거나, 기존 데이터가 달라진 것이다. 따라서, 이후 작업의 결과를 신뢰할 수 없게 되고, 검증 결과도 신뢰하기 어렵다.
 ```
 
 ---
@@ -69,18 +69,18 @@ code/chapter09/01_transaction_lab_schema.sql
 ## 2-1. 생성 전 예상
 
 ```text
-생성될 스키마:
-생성될 테이블 3개:
+생성될 스키마:transaction_lab
+생성될 테이블 3개:transaction_lab.course_inventory, transaction_lab.enrollments. transaction_lab.payments
 
-course_inventory 한 행의 의미:
-enrollments 한 행의 의미:
-payments 한 행의 의미:
+course_inventory 한 행의 의미:특정 강의의 정원과 남은 좌석 정보
+enrollments 한 행의 의미: 학생 한 명의 강의 신청 한 건
+payments 한 행의 의미: 강의 신청과 연결된 결제 한 건
 ```
 
 ## 2-2. 생성 결과
 
 ```text
-통과 메시지:
+통과 메시지:Chapter 09 transaction lab schema validation passed
 ```
 
 기대 메시지:
@@ -92,7 +92,7 @@ Chapter 09 transaction lab schema validation passed
 ### Chapter 07·08의 `course_project`와 별도 `transaction_lab`을 사용하는 이유
 
 ```text
-
+좌석 변경, 신청 생성, 결제 생성 등의 트랜젝션을 할 때, 기존 Chapter 07·08의 course_project 데이터에 영향을 주지 않고 진행하고자 하기 때문이다. 또한, 변경 결과가 조건에 맞는지 검증한 뒤 COMMIT하는 것이 안전하고, 필요하면 ROLLBACK할 수 있도록 하기 위해서다.
 ```
 
 ### 증거 화면
@@ -103,7 +103,7 @@ Chapter 09 transaction lab schema validation passed
 assignments/chapter09/images/step02_schema.png
 ```
 
-`여기에 transaction_lab 구조가 보이는 핵심 화면을 삽입하세요.`
+<img width="1163" height="956" alt="image" src="https://github.com/user-attachments/assets/46688267-e8d6-4f9f-8143-be435af382de" />
 
 ---
 
@@ -118,22 +118,22 @@ code/chapter09/02_transaction_lab_seed.sql
 ## 3-1. 실행 전 예상
 
 ```text
-course 301 remaining_seats 예상:
-course 302 remaining_seats 예상:
-course 303 remaining_seats 예상:
-lab enrollments 예상 행 수:
-payments 예상 행 수:
+course 301 remaining_seats 예상: 2
+course 302 remaining_seats 예상: 1
+course 303 remaining_seats 예상: 1
+lab enrollments 예상 행 수: 0
+payments 예상 행 수: 0
 ```
 
 ## 3-2. 실제 결과
 
 ```text
-course 301 remaining_seats:
-course 302 remaining_seats:
-course 303 remaining_seats:
-lab enrollments 행 수:
-payments 행 수:
-통과 메시지:
+course 301 remaining_seats: 2
+course 302 remaining_seats: 1
+course 303 remaining_seats: 1
+lab enrollments 행 수:0
+payments 행 수:0
+통과 메시지:Chapter 09 transaction lab seed validation passed
 ```
 
 기대 초기 상태:
@@ -147,7 +147,17 @@ payments = 0
 ### 예상과 실제가 다른 경우 원인
 
 ```text
-
+실행 전 예상했던 것과 실제 결과는 일치하였다. 그러나, 기대 초기 상태와는 불일치하였다. inventroy 자체가 3개의 seat 인 것은 맞는데, 각각의 course 에 2, 1, 1 개의 remaining seats가 있는 결과가 나왔다.
+INSERT INTO transaction_lab.course_inventory (
+    course_id,
+    capacity,
+    remaining_seats
+)
+VALUES
+    (301, 2, 2),
+    (302, 1, 1),
+    (303, 1, 1);
+를 입력하였기 때문에 현재의 결과가 나오는 것은 타당하다. 
 ```
 
 ---
@@ -176,19 +186,19 @@ code/chapter09/03_commit_transaction.sql
 
 | 시점 | course 301 남은 좌석 | lab enrollment 9001 | payment 9901 | 설명 |
 | --- | ---: | --- | --- | --- |
-| BEGIN 전 |  |  |  |  |
-| 트랜잭션 내부 |  |  |  |  |
-| COMMIT 후 |  |  |  |  |
+| BEGIN 전 | 2 | 없음 | 없음 | 초기 상태와 같다. |
+| 트랜잭션 내부 | 1 | 생성됨 | 생성됨 | 변경이 실행되었지만 commit 되기 이전이다. |
+| COMMIT 후 | 1 | 생성 | 생성됨 | 변경이 실행되어 commit 된 이후이다. |
 
 ## 4-3. COMMIT 조건
 
 ```text
-좌석 UPDATE 기대 영향 행 수:
-실제 영향 행 수:
-신청 생성 기대 행 수:
-결제 생성 기대 행 수:
-recorded_amount와 payment.amount 일치 여부:
-최종 COMMIT 판단:
+좌석 UPDATE 기대 영향 행 수: 1
+실제 영향 행 수: 1
+신청 생성 기대 행 수: 1
+결제 생성 기대 행 수: 1
+recorded_amount와 payment.amount 일치 여부: 일치
+최종 COMMIT 판단: 기대와 일치하고, 검증 결과 통과 메시지를 얻어 commit 하는 것이 적절하다고 판단하였다. 
 ```
 
 기대 메시지:
@@ -200,7 +210,7 @@ Chapter 09 first commit validation passed
 ### SQL 오류가 없었다는 사실만으로 COMMIT하면 안 되는 이유
 
 ```text
-
+SQL이 오류 없이 실행되어도 의도한 행이 변경되지 않았거나, 예상보다 많은 행이 변경되었거나, 신청과 결제 금액이 서로 다를 수 있다. 따라서 영향 행 수와 최종 데이터 상태가 업무 규칙에 맞는지 확인한 뒤 COMMIT해야 한다.
 ```
 
 ### 증거 화면
@@ -211,7 +221,7 @@ Chapter 09 first commit validation passed
 assignments/chapter09/images/step04_commit.png
 ```
 
-`여기에 COMMIT 후 좌석·신청·결제 관계를 확인할 수 있는 화면을 삽입하세요.`
+<img width="1176" height="950" alt="image" src="https://github.com/user-attachments/assets/de90cd18-8717-4e0c-a5ed-be431da0530d" />
 
 ---
 
@@ -271,12 +281,12 @@ code/chapter09/05_commit_and_sold_out.sql
 ## 6-1. 두 번째 정상 COMMIT
 
 ```text
-생성된 enrollment id:
-학생 id:
-course id:
-recorded_amount:
-payment id:
-payment amount:
+생성된 enrollment id: 9002
+학생 id: 103
+course id: 302
+recorded_amount: 120000
+payment id:9902
+payment amount:120000
 ```
 
 ## 6-2. 좌석 부족 시도
@@ -395,60 +405,6 @@ Durability:
 
 ---
 
-# 9. 선택 실습 — 두 세션 Lock 대기 관찰
-
-실행 파일:
-
-```text
-code/chapter09/07_concurrency_two_sessions.sql
-```
-
-가능하면 DBeaver에서 **서로 다른 두 연결 세션**으로 수행합니다.
-
-## 9-1. 내 환경
-
-```text
-실제 두 세션 실습 수행 / 절차 분석만 수행:
-transaction_isolation:
-lock_timeout:
-```
-
-## 9-2. 시간 순서 기록
-
-| 순서 | Session A | Session B | 관찰 |
-| ---: | --- | --- | --- |
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  |  |
-
-```text
-먼저 Lock을 획득한 세션:
-대기한 세션:
-A가 COMMIT/ROLLBACK한 뒤 B에서 일어난 일:
-```
-
-### Lock 대기와 Deadlock의 차이
-
-```text
-
-```
-
-### `SELECT ... FOR UPDATE`가 모든 UPDATE 앞에 항상 필요한 것은 아닌 이유
-
-```text
-
-```
-
-### 증거 화면
-
-실제 수행했다면 권장 경로:
-
-```text
-assignments/chapter09/images/step09_lock.png
-```
-
----
 
 # 10. 선택 실습 — 취소와 좌석 복구
 
@@ -486,38 +442,14 @@ course 301 remaining 1 → 2
 
 ---
 
-# 11. 선택 실습 — 오류 상태와 SAVEPOINT
+### 증거 화면
 
-실행 파일:
-
-```text
-code/chapter09/09_error_and_savepoint.sql
-```
-
-## 11-1. 일반 오류 후 트랜잭션 상태
+실제 수행했다면 권장 경로:
 
 ```text
-발생시킨 오류:
-오류 이후 다음 SQL 실행 결과:
-전체 ROLLBACK이 필요한 이유:
+<img width="1136" height="905" alt="image" src="https://github.com/user-attachments/assets/f3c2dbfa-187d-4384-8583-9f16b3351959" />
 ```
 
-## 11-2. SAVEPOINT 사용
-
-```text
-SAVEPOINT 이름:
-오류 발생 위치:
-ROLLBACK TO SAVEPOINT 후 상태:
-이후 계속 실행할 수 있었는가:
-```
-
-### SAVEPOINT가 전체 ROLLBACK과 다른 점
-
-```text
-
-```
-
----
 
 # 12. 개인 프로젝트 트랜잭션 시나리오 설계
 
