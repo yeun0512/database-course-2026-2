@@ -463,35 +463,34 @@ Chapter 07에서 시작한 개인 프로젝트를 사용합니다.
 예:
 
 ```text
-예약 생성 + 좌석 차감
-주문 생성 + 재고 차감
-대여 생성 + 대여 가능 상태 변경
-답변 등록 + 질문 상태 변경
+배송 사건 생성 + 재고 차감 + 영양 성분 기입 
 ```
 
 ## 12-1. 업무 정의
 
 ```text
 시나리오 ID: P09-T01
-업무 이름:
-사용자 행동:
+업무 이름: 배송 기록과 회원 영양정보 기록
+사용자 행동: 구독 배송 한 건의 실제 배송 내용을 기록한다.
 왜 하나의 트랜잭션이어야 하는가:
+배송 기록과 배송 상품 기록, 해당 회원의 영양정보 연결 기록이 함께 남아야 하기 때문이다.
+일부만 저장되면 배송은 기록됐는데 상품이나 영양정보 기록이 빠지는 상태가 될 수 있다.
 ```
 
 ## 12-2. 트랜잭션 설계표
 
 | 항목 | 내 설계 |
 | --- | --- |
-| BEGIN 전 확인 상태 |  |
-| 잠금/경쟁 가능 데이터 |  |
-| 변경 1 |  |
-| 기대 영향 행 수 |  |
-| 변경 2 |  |
-| 기대 영향 행 수 |  |
-| 추가 변경 |  |
-| COMMIT 전 검증 |  |
-| COMMIT 조건 |  |
-| ROLLBACK 조건 |  |
+| BEGIN 전 확인 상태 | 대상 subscription과 연결된 member가 존재하고, 기록할 배송 상품과 수량 및 각 상품의 기준 영양정보가 확인되어야 한다. |
+| 잠금/경쟁 가능 데이터 | 동일한 배송 사건이 동시에 기록되어 중복 생성될 가능성이 있다. 그러나 이는 허용되지 않도록 하여야 한다. |
+| 변경 1 | shipment에 배송 사건 한 건을 기록한다. |
+| 기대 영향 행 수 | 1행 |
+| 변경 2 | 배송 상품과 수량을 shipment_items에 기록한다. |
+| 기대 영향 행 수 | 배송 상품 종류 수만큼 |
+| 추가 변경 | 각 배송 상품의 영양 성분별 배송 당시 수치를 shipment_item_nutritions에 기록한다. 회원은 shipment → subscription → members 관계를 통해 확인한다. |
+| COMMIT 전 검증 | 배송 행이 1건인지, 배송 상품과 수량이 입력 내용과 맞는지, 각 배송 상품에 필요한 영양정보가 연결되어 있는지 검증한다. 배송 당시 영양 수치도 해당 배송 상품의 기준 영양정보 및 수량과 맞는지 확인한다. |
+| COMMIT 조건 | 배송, 배송 상품, 배송 당시 영양정보 기록이 모두 생성되고 연결 관계와 수치 검증을 통과할 때 COMMIT한다. |
+| ROLLBACK 조건 | 배송이나 상품 또는 영양정보 기록이 누락되거나, 입력한 상품·수량·영양 수치가 검증 기준과 다르면 전체를 ROLLBACK한다. |
 
 ## 12-3. 실패 시나리오
 
@@ -499,20 +498,71 @@ Chapter 07에서 시작한 개인 프로젝트를 사용합니다.
 
 ```text
 실패 1:
-어느 단계에서 발생:
-남으면 안 되는 부분 상태:
-ROLLBACK 후 기대 상태:
+어느 단계에서 발생: shipment 기록 후 shipment_items를 기록하는 단계
+남으면 안 되는 부분 상태: 배송 사건은 있지만 배송 상품 내역이 없거나 일부만 기록된 상태
+ROLLBACK 후 기대 상태: 이번 트랜잭션에서 생성한 shipment와 shipment_items가 모두 없어야 한다.
 
 실패 2:
-어느 단계에서 발생:
-남으면 안 되는 부분 상태:
-ROLLBACK 후 기대 상태:
+어느 단계에서 발생: shipment_items 기록 후 shipment_item_nutritions를 기록하거나 검증하는 단계
+남으면 안 되는 부분 상태: 배송과 배송 상품은 기록됐지만 배송 당시 영양정보가 누락되거나 수치가 맞지 않는 상태
+ROLLBACK 후 기대 상태: 이번 트랜잭션에서 생성한 shipment, shipment_items, shipment_item_nutritions가 모두 없어야 한다.
 ```
 
 ## 12-4. SQL 초안
 
 ```sql
 -- 아직 테이블 구현 전이라면 의사 SQL이어도 됩니다.
+
+BEGIN;
+INSERT INTO shipment (
+    subscription_id,
+    scheduled_date,
+    shipped_at,
+    status
+)
+VALUES (
+    대상_subscription_id,
+    배송_예정일,
+    실제_배송시각,
+    배송_상태
+)
+RETURNING id INTO 새_shipment_id;
+
+INSERT INTO shipment_items (
+    shipment_id,
+    item_id,
+    quantity
+)
+VALUES
+    (새_shipment_id, 상품_id_1, 수량_1),
+    (새_shipment_id, 상품_id_2, 수량_2);
+
+-- 배송 상품별 영양 성분과 배송 당시 수치를 기록한다.
+-- nutrition_id는 해당 상품의 기준 영양정보를 가리킨다.
+-- amount_at_delivery는 배송 수량 기준으로 계산한 배송 당시 영양 수치다.
+INSERT INTO shipment_item_nutritions (
+    shipment_item_id,
+    nutrition_id,
+    amount_at_delivery
+)
+VALUES
+    (배송상품행_id_1, 기준영양정보_id_1, 배송당시_영양수치_1),
+    (배송상품행_id_1, 기준영양정보_id_2, 배송당시_영양수치_2),
+    (배송상품행_id_2, 기준영양정보_id_3, 배송당시_영양수치_3);
+
+
+-- 검증
+shipment는 1행 생성됐는가?
+shipment_items의 행 수·상품·수량은 입력과 일치하는가?
+shipment_item_nutritions가 배송 상품별 영양 성분과 배송 당시 수치를 기록했는가?
+각 배송 상품은 올바른 shipment에 연결되어 있는가?
+ASSERT 위 검증이 모두 통과함;
+
+검증에 성공하는 경우
+COMMIT;
+
+검증 중 하나라도 실패하는 경우
+ROLLBACK;
 
 ```
 
