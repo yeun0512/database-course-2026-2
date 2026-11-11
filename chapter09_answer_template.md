@@ -236,20 +236,20 @@ code/chapter09/04_rollback_transaction.sql
 ## 5-1. ROLLBACK 전 예상
 
 ```text
-트랜잭션 안에서 임시로 바뀔 값:
-ROLLBACK 후 다시 돌아와야 할 값:
-이미 이전 파일에서 COMMIT된 9001/9901은 유지되어야 하는가:
+트랜잭션 안에서 임시로 바뀔 값: 강의 301의 remaining seats 가 1에서 0으로 줄어들어야 한다. 또한, 신청 9002와 결제 9902가 생성되어야 한다. 
+ROLLBACK 후 다시 돌아와야 할 값: 이전 파일에서 commit되고 난 이후, 변경되지 상태인 remaing seats 1, 신청, 결제 행의 수 각각 1이 유지되어야 한다. 
+이미 이전 파일에서 COMMIT된 9001/9901은 유지되어야 하는가:유지되어야 한다. 이전 트랜잭션에서 COMMIT된 변경은 ROLLBACK의 대상이 아니기 때문이다. 
 ```
 
 ## 5-2. 실제 결과
 
 ```text
-ROLLBACK 후 course 301 상태:
-ROLLBACK 후 lab enrollments 행 수:
-ROLLBACK 후 payments 행 수:
-9001 존재 여부:
-9901 존재 여부:
-통과 메시지:
+ROLLBACK 후 course 301 상태:remaining_seats = 1
+ROLLBACK 후 lab enrollments 행 수:1
+ROLLBACK 후 payments 행 수:1
+9001 존재 여부:존재함
+9901 존재 여부:존재함
+통과 메시지:Chapter 09 rollback validation passed
 ```
 
 기대 메시지:
@@ -261,11 +261,11 @@ Chapter 09 rollback validation passed
 ## 5-3. ROLLBACK과 IDENTITY
 
 ```text
-ROLLBACK이 테이블 행 변경을 되돌리는 방식:
+ROLLBACK이 테이블 행 변경을 되돌리는 방식:현재 트랜잭션에서 실행한 INSERT, UPDATE, DELETE 변경을 취소해 트랜잭션 시작 전 상태로 되돌린다.
 
-IDENTITY 자동 번호가 반드시 이전 값으로 되돌아가지는 않는 이유:
+IDENTITY 자동 번호가 반드시 이전 값으로 되돌아가지는 않는 이유:자동 번호를 만드는 시퀀스 값은 일반 테이블 변경과 별도로 관리되기 때문이다. 따라서, 번호를 가져온 뒤 ROLLBACK해도 그 시퀀스 값은 복구되지 않을 수 있.
 
-번호가 건너뛰었다고 데이터 손상이라고 단정할 수 없는 이유:
+번호가 건너뛰었다고 데이터 손상이라고 단정할 수 없는 이유:번호는 고유 식별을 위한 값이지, 빈틈없이 연속되어야 하는 값이 아니기 때문이다. 취소된 트랜잭션에서 사용한 번호가 다음 번호에 반영되지 않아도 데이터가 손상된 것은 아니다. 
 ```
 
 ---
@@ -292,10 +292,10 @@ payment amount:120000
 ## 6-2. 좌석 부족 시도
 
 ```text
-좌석 확보 UPDATE 기대 영향 행 수:
-실제 영향 행 수:
-후속 enrollment 생성 행 수:
-후속 payment 생성 행 수:
+좌석 확보 UPDATE 기대 영향 행 수:0
+실제 영향 행 수:0
+후속 enrollment 생성 행 수:0
+후속 payment 생성 행 수:0
 ```
 
 기준상 좌석 부족 시 생성되지 않아야 하는 ID:
@@ -308,13 +308,14 @@ payment amount:120000
 ### `UPDATE 0`이 SQL 실패가 아니라 업무상 실패일 수 있는 이유
 
 ```text
-
+SQL 문법과 실행에는 문제가 없어도 조건에 맞는 행이 없으면 UPDATE 결과는 0행일 수 있다.
+예를 들어, 강의 302의 남은 좌석이 0이라 좌석 확보되지 않아 UPDATE 결과는 0행이 된다. 이는 SQL 오류라고 할 수는 없지만, 신청이 처리되지 않는 것이다. 따라서, 이러한 경우 SQL 실패가 아니라 업무상 실패이다. 
 ```
 
 ### 영향 행 수가 0인데 신청과 결제를 계속 생성하면 어떤 정합성 문제가 생기나요?
 
 ```text
-
+좌석을 확보하지 못했는데 신청과 결제가 생성되어 학생 수만 많아질 수 있다. 이로 인해 학생 수가 정원보다 많아지는 등 문제가 발생할 수 있다. 즉, 실제 좌석 상태와 신청, 결제 데이터가 맞지 않아져 정합성 문제가 생길 수 있다. 
 ```
 
 ---
@@ -331,33 +332,33 @@ code/chapter09/06_transaction_validation.sql
 
 | 항목 | 기대값 | 실제값 | 일치? |
 | --- | ---: | ---: | --- |
-| course_inventory 행 수 | 3 |  |  |
-| lab enrollments 행 수 | 2 |  |  |
-| payments 행 수 | 2 |  |  |
-| course 301 remaining | 1 |  |  |
-| course 302 remaining | 0 |  |  |
-| course 303 remaining | 1 |  |  |
+| course_inventory 행 수 | 3 | 3 | 일치 |
+| lab enrollments 행 수 | 2 | 2 | 일치 |
+| payments 행 수 | 2 | 2 | 일치 |
+| course 301 remaining | 1 | 1 | 일치 |
+| course 302 remaining | 0 | 0 | 일치 |
+| course 303 remaining | 1 | 1 | 일치 |
 
 ## 7-2. 주요 행
 
 ```text
 9001 = student 101 / course 301 / amount 100000 / payment 9901
-실제:
+실제: student 101 / course 301 / recorded_amount 100000 / payment 9901 amount 100000
 
 9002 = student 103 / course 302 / amount 120000 / payment 9902
-실제:
+실제 :student 103 / course 302 / recorded_amount 120000 / payment 9902 amount 120000
 
 9003·9903 = 존재하지 않아야 함
-실제:
+실제: 둘 다 존재하지 않는다. 
 ```
 
 ## 7-3. 보호 대상 확인
 
 ```text
-course_project.enrollments 행 수:
-전체 recorded_amount:
-활성 건수/금액:
-취소 제외 건수/금액:
+course_project.enrollments 행 수:5
+전체 recorded_amount:590000
+활성 건수/금액:3, 340000
+취소 제외 건수/금액:4, 440000
 ```
 
 기대값:
@@ -378,7 +379,7 @@ Chapter 09 main transaction validation passed
 ### transaction_lab 실습 후에도 course_project 기준 상태를 다시 검사하는 이유
 
 ```text
-
+transaction_lab에서 실습을 진행할 때, 강의 가격 조회 등을 위해 course_project 데이터를 참조한다.따라서 실습 후에도 기존 course_project 데이터가 변경되지 않았는지 확인해야 기존 데이터를 변경하지 않고, 별도 공간을 사용하고자 한 목적이 지켜졌는지 검증할 수 있다.
 ```
 
 ---
@@ -388,19 +389,19 @@ Chapter 09 main transaction validation passed
 교과서 정의를 그대로 복사하지 말고 이번 좌석·신청·결제 사례로 작성합니다.
 
 ```text
-Atomicity:
+Atomicity: 좌석 차감, 신청 생성, 결제 생성을 하나의 트랜잭션으로 처리한다. 중간에 문제가 생기면 일부 변경만 남기지 않고 전체를 ROLLBACK할 수 있다.
 
-Consistency:
+Consistency: 트랜잭션 전후에 데이터가 정해진 규칙을 만족해야 한다. 예를 들어 좌석이 있을 때만 신청을 만들고, 신청 금액과 결제 금액을 일치시킨다.
 
-Isolation:
+Isolation: 트랜잭션이 진행되는 동안 좌석 행을 잠가 다른 작업이 같은 좌석을 동시에 차감해 정원을 초과하는 상황을 막도록 한다.
 
-Durability:
+Durability: COMMIT이 완료되면 좌석 차감, 신청, 결제 변경이 확정되어 이후에도 유지된다.
 ```
 
 ### Atomicity와 Consistency가 같은 뜻이 아닌 이유
 
 ```text
-
+Atomicity는 여러 변경이 모두 반영되거나 모두 취소되는 처리 방식이다. 반면, Consistency는 그 결과가 업무 규칙과 데이터 제약을 만족하는 상태인지를 말한다.모든 변경을 한꺼번에 반영해도 잘못된 값이 들어가면 일관성은 깨질 수 있다.
 ```
 
 ---
@@ -415,13 +416,13 @@ code/chapter09/08_cancel_and_restore.sql
 ```
 
 ```text
-9001 취소 성공 행 수:
-course 301 좌석 변화:
-같은 취소를 다시 시도한 행 수:
-두 번째 좌석 복구 행 수:
-payment 9901 유지 여부:
-최종 ROLLBACK 후 원상복구 여부:
-통과 메시지:
+9001 취소 성공 행 수: 1행
+course 301 좌석 변화: remaining_seats가 1에서 2로 증가
+같은 취소를 다시 시도한 행 수: 0행
+두 번째 좌석 복구 행 수: 0행
+payment 9901 유지 여부: 유지됨
+최종 ROLLBACK 후 원상복구 여부: 원상복구됨. 신청 9001은 수강중, 좌석은 1이며 payment 9901도 유지됨
+통과 메시지: Chapter 09 cancel rollback validation passed
 ```
 
 기대 흐름:
@@ -437,9 +438,11 @@ course 301 remaining 1 → 2
 ### 같은 취소를 두 번 처리해도 좌석이 두 번 증가하지 않아야 하는 이유
 
 ```text
-
+취소 처리는 수강중 상태인 신청만 취소하도록 조건을 둔다.
+첫 번째 처리에서 상태가 이미 취소로 바뀌면 두 번째 시도는 조건에 맞는 행이 없어 0행을 변경하고,
+그 취소된 행을 바탕으로 좌석을 복구하지도 않는다.
+이렇게 해야 한 신청의 취소를 반복 처리해 좌석이 정원보다 많아지는 문제를 막을 수 있기 때문이다.
 ```
-
 ---
 
 ### 증거 화면
