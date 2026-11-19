@@ -32,16 +32,16 @@ SHOW search_path;
 
 | 확인 항목 | 실제 결과 | 의미 |
 | --- | --- | --- |
-| PostgreSQL 버전 | 18 |  |
-| `current_database()` |  |  |
-| `current_user` | postgres |  |
-| `current_schema()` |  |  |
-| `search_path` |  |  |
+| PostgreSQL 버전 | 18 | 사용 중인 PostgreSQL의 버전이 18이다. |
+| `current_database()` | ai_database_book | 현재 ai_database_book 데이터베이스에 연결되어 있다. |
+| `current_user` | postgres | 현재 사용자가 postgres이다. |
+| `current_schema()` | public | 기본 스키마가 public이다. |
+| `search_path` | public, "$user" | 테이블을 찾을 때 먼저 public을 확인하고, 그다음 사용자 이름과 같은 스키마를 확인한다. |
 
 ### PostgreSQL 버전을 기록해야 하는 이유
 
 ```text
-
+PostgreSQL 버전에 따라 사용할 수 있는 기능이나 SQL 동작이 달라질 수 있기 때문이다.같은 SQL을 실행해도 버전에 따라 결과나 지원 여부가 달라질 수 있다. 
 ```
 
 > 이 장의 자동 검증 기준은 PostgreSQL 16입니다. PostgreSQL 18 이상에서는 B-tree Skip Scan 등으로 동일 SQL의 실행 계획이 달라질 수 있습니다.
@@ -86,7 +86,7 @@ enrollments: 5
 ### 성능 실험을 기존 `course_project`에 대량 데이터를 넣지 않고 별도 스키마에서 하는 이유
 
 ```text
-
+기존 course_project 데이터와 수업 프로젝트에 영향을 주지 않고, 실험용 데이터를 자유롭게 추가·삭제할 수 있기 때문이다. 별도 스키마를 사용하면 실험 결과를 기존 테이블과 구분해 관리하기도 쉽다.
 ```
 
 ---
@@ -104,25 +104,25 @@ code/chapter10/02_performance_lab_seed.sql
 
 | 테이블 | 기대 행 수 | 실제 행 수 | 일치? |
 | --- | ---: | ---: | --- |
-| `performance_lab.students` | 10003 |  |  |
-| `performance_lab.instructors` | 2 |  |  |
-| `performance_lab.courses` | 2003 |  |  |
-| `performance_lab.enrollments` | 100005 |  |  |
+| `performance_lab.students` | 10003 | 10003 | 일치 |
+| `performance_lab.instructors` | 2 | 2 | 일치 |
+| `performance_lab.courses` | 2003 | 2003 | 일치 |
+| `performance_lab.enrollments` | 100005 | 100005 | 일치 |
 
 ## 3-2. 데이터 분포 확인
 
 | 조건 | 기대 행 수 | 실제 행 수 | 대략적 비율 |
 | --- | ---: | ---: | ---: |
-| `performance5000@example.com` | 1 |  |  |
-| `student_id = 5000` | 10 |  | 약 0.010% |
-| `course_id = 1500` | 50 |  | 약 0.050% |
-| `course_id = 1500 AND status='수강중'` | 15 |  | 약 0.015% |
-| 전체 `status='수강중'` | 30001 |  | 약 30.0% |
+| `performance5000@example.com` | 1 | 1 | 약 0.010% |
+| `student_id = 5000` | 10 | 10 | 약 0.010% |
+| `course_id = 1500` | 50 | 50 | 약 0.050% |
+| `course_id = 1500 AND status='수강중'` | 15 | 15 | 약 0.015% |
+| 전체 `status='수강중'` | 30001 | 30001 | 약 30.0% |
 
 ### 선택도가 낮은 조건과 많은 행을 반환하는 조건은 인덱스 판단에서 어떻게 다르게 볼 수 있나요?
 
 ```text
-
+조건에 맞는 행이 전체에서 차지하는 비율이 작으면 선택도가 높아 인덱스를 통해 필요한 행만 찾는 것이 유리할 수 있다. 반대로 조건에 맞는 행이 많으면 인덱스로 많은 행을 하나씩 찾는 것보다 테이블을 순차적으로 읽는 편이 효율적일 수 있다. 
 ```
 
 ### 증거 화면
@@ -152,15 +152,18 @@ code/chapter10/03_baseline_explain.sql
 ## Query A
 
 ```text
-업무 질문:
-WHERE / JOIN / ORDER BY / LIMIT:
-예상 반환 행 수:
-실제 반환 행 수:
+업무 질문: 특정 이메일을 가진 학생을 조회한다.
+WHERE / JOIN / ORDER BY / LIMIT: WHERE email = 'performance5000@example.com'
+예상 반환 행 수: 1
+실제 반환 행 수: 1
 ```
 
 ```sql
 -- 대상 SQL
-
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT id, name, email
+FROM performance_lab.students
+WHERE email = 'performance5000@example.com';
 ```
 
 | 관찰 항목 | 기록 |
@@ -177,10 +180,22 @@ WHERE / JOIN / ORDER BY / LIMIT:
 ## Query B
 
 ```text
-업무 질문:
-WHERE / JOIN / ORDER BY / LIMIT:
-예상 반환 행 수:
-실제 반환 행 수:
+업무 질문: 특정 학생의 신청 내역과 해당 학생·강의 정보를 함께 조회한다.
+WHERE / JOIN / ORDER BY / LIMIT: WHERE e.student_id = 5000; students와 courses를 JOIN
+예상 반환 행 수: 10
+실제 반환 행 수: 10
+
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT
+    e.id,
+    s.name AS student_name,
+    c.title AS course_title,
+    e.status,
+    e.recorded_amount
+FROM performance_lab.enrollments AS e
+JOIN performance_lab.students AS s ON s.id = e.student_id
+JOIN performance_lab.courses AS c ON c.id = e.course_id
+WHERE e.student_id = 5000;
 ```
 
 | 관찰 항목 | 기록 |
@@ -196,10 +211,15 @@ WHERE / JOIN / ORDER BY / LIMIT:
 ## Query C
 
 ```text
-업무 질문:
-WHERE / JOIN / ORDER BY / LIMIT:
-예상 반환 행 수:
-실제 반환 행 수:
+업무 질문: 수강 중인 신청 내역을 모두 조회한다.
+WHERE / JOIN / ORDER BY / LIMIT: WHERE status = '수강중'
+예상 반환 행 수: 30001
+실제 반환 행 수: 30001
+
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT id, student_id, course_id, status
+FROM performance_lab.enrollments
+WHERE status = '수강중';
 ```
 
 | 관찰 항목 | 기록 |
@@ -215,13 +235,13 @@ WHERE / JOIN / ORDER BY / LIMIT:
 ### `cost`와 실제 실행 시간이 같은 개념이 아닌 이유
 
 ```text
-
+cost는 PostgreSQL이 여러 실행 계획의 상대적인 효율을 비교하기 위해 계산한 추정 비용이며, 시간 단위가 아니다. 실제 실행 시간은 데이터가 메모리에 있는지, 디스크를 읽는지, 시스템 부하가 어떤지 등에 따라 달라질 수 있다.
 ```
 
 ### `EXPLAIN ANALYZE`는 실제 SQL을 실행한다는 점을 왜 기억해야 하나요?
 
 ```text
-
+EXPLAIN ANALYZE는 계획만 보여주는 것이 아니라 대상 SQL을 실제로 실행해 행 수와 시간을 측정하기 때문이다. 따라서 SELECT는 조회 결과를 실제로 읽고, INSERT·UPDATE·DELETE는 데이터를 실제로 변경할 수 있으므로 실행 전에 SQL의 영향을 확인해야 한다.
 ```
 
 ### 증거 화면
