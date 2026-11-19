@@ -32,9 +32,9 @@ SHOW search_path;
 
 | 확인 항목 | 실제 결과 | 의미 |
 | --- | --- | --- |
-| PostgreSQL 버전 |  |  |
+| PostgreSQL 버전 | 18 |  |
 | `current_database()` |  |  |
-| `current_user` |  |  |
+| `current_user` | postgres |  |
 | `current_schema()` |  |  |
 | `search_path` |  |  |
 
@@ -74,13 +74,13 @@ enrollments = 5
 ### 실제 확인 결과
 
 ```text
-students:
-instructors:
-courses:
-enrollments:
-전체 recorded_amount:
-활성 신청 건수/금액:
-취소 제외 건수/금액:
+students: 3
+instructors: 2
+courses: 3
+enrollments: 5
+전체 recorded_amount: 590000
+활성 신청 건수/금액: 3건 / 340000
+취소 제외 건수/금액: 4건 / 440000
 ```
 
 ### 성능 실험을 기존 `course_project`에 대량 데이터를 넣지 않고 별도 스키마에서 하는 이유
