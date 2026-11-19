@@ -273,9 +273,9 @@ idx_performance_enrollments_course_status
 
 | 후보 인덱스 | 대응 조회 패턴 | 예상 이점 | 컬럼 순서 이유 | 예상 비용/단점 |
 | --- | --- | --- | --- | --- |
-| `idx_performance_courses_title` | WHERE title = ?	 | 제목에 해당하는 강의를 빠르게 찾는 데 도움이 될 수 있음 | 단일 컬럼 인덱스이므로 컬럼 순서 선택은 없음 | 저장 공간을 사용하고, 강의 추가나 제목 변경 등이 있는 경우 인덱스 갱신 비용이 발생함 |
-| `idx_performance_enrollments_student_id` | WHERE student_id = ? | 해당 학생의 신청 내역을 찾는 데 도움이 될 수 있음 | 단일 컬럼 인덱스이므로 컬럼 순서 선택은 없음 | 저장 공간을 사용하고, 신청 데이터 변경 시 인덱스 갱신 비용이 발생함 |
-| `idx_performance_enrollments_course_status` | WHERE course_id = ? WHERE course_id = ? AND status = ?	| 특정 강의의 신청 내역에서 특정 상태의 신청으로 범위를 좁히는 데 도움이 될 수 있음	 | course_id를 앞에 두어야, PostgresSQL 16과 같은 환경에서도 course_id와 status를 함꼐 고려하도록 활용할 수 있음 | 저장 공간을 사용하고, 신청 데이터 변경 시 인덱스 갱신 비용이 발생함. 많은 행을 반환하면 이점이 작을 수 있음 |
+| `idx_performance_courses_title` | WHERE title	 | 제목에 해당하는 강의를 빠르게 찾는 데 도움이 될 수 있음 | 단일 컬럼 인덱스이므로 컬럼 순서 선택은 없음 | 저장 공간을 사용하고, 강의 추가나 제목 변경 등이 있는 경우 인덱스 갱신 비용이 발생함 |
+| `idx_performance_enrollments_student_id` | WHERE student_id | 해당 학생의 신청 내역을 찾는 데 도움이 될 수 있음 | 단일 컬럼 인덱스이므로 컬럼 순서 선택은 없음 | 저장 공간을 사용하고, 신청 데이터 변경 시 인덱스 갱신 비용이 발생함 |
+| `idx_performance_enrollments_course_status` | WHERE course_id, WHERE course_id AND status	| 특정 강의의 신청 내역에서 특정 상태의 신청으로 범위를 좁히는 데 도움이 될 수 있음 | course_id를 앞에 두어야, PostgresSQL 16과 같은 환경에서도 course_id와 status를 함꼐 고려하도록 활용할 수 있음 | 저장 공간을 사용하고, 신청 데이터 변경 시 인덱스 갱신 비용이 발생함. 많은 행을 반환하면 이점이 작을 수 있음 |
 
 ### “중요한 컬럼이므로 인덱스를 만든다”는 설명이 부족한 이유
 
