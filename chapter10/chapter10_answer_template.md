@@ -705,7 +705,7 @@ EXPLAIN (ANALYZE, BUFFERS) 핵심 결과:
 https://github.com/<본인-GitHub-ID>/<본인-저장소>/blob/main/assignments/chapter10/chapter10_answer.md
 ```
 
-내 제출 URL:
+내 제출 URL:https://github.com/yeun0512/database-course-2026-2/blob/main/chapter10/chapter10_answer_template.md
 
 ```text
 
