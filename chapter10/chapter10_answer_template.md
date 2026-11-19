@@ -237,13 +237,14 @@ WHERE status = '수강중';
 ### `cost`와 실제 실행 시간이 같은 개념이 아닌 이유
 
 ```text
-cost는 PostgreSQL이 여러 실행 계획의 상대적인 효율을 비교하기 위해 계산한 추정 비용이며, 시간 단위가 아니다. 실제 실행 시간은 데이터가 메모리에 있는지, 디스크를 읽는지, 시스템 부하가 어떤지 등에 따라 달라질 수 있다.
+cost는 PostgreSQL이 여러 실행 계획의 상대적인 효율을 비교하기 위해 사용하는 내부 추정 비용이다. 즉, cost=123.45라고 제시되더라도, 123ms의 시간 단위로 해석하면 안된다.
+실제 실행 시간은 내부 비용 추정과는 달라질 수 있기 때문이다.
 ```
 
 ### `EXPLAIN ANALYZE`는 실제 SQL을 실행한다는 점을 왜 기억해야 하나요?
 
 ```text
-EXPLAIN ANALYZE는 계획만 보여주는 것이 아니라 대상 SQL을 실제로 실행해 행 수와 시간을 측정하기 때문이다. 따라서 SELECT는 조회 결과를 실제로 읽고, INSERT·UPDATE·DELETE는 데이터를 실제로 변경할 수 있으므로 실행 전에 SQL의 영향을 확인해야 한다.
+EXPLAIN와 EXPLAIN (ANALYZE, BUFFERS)의 차이가 있음에 주목해야하기 때문이다. 전자는 실행계획을 예측하기만 하지만, EXPLAIN ANALYZE는 계획만 보여주는 것이 아니라 대상 SQL을 실제로 실행한다. 따라서 이 때의 SELECT는 조회 결과를 실제로 읽는 것이다. 이를 적용하면 INSERT, UPDATE, DELETE 가 있는 경우 데이터가 실제로 변경된다. 따라서, 실제 변경을 일으킬 수 있어 안전하지 않을 수 있음에 유의해야하기 때문이다. 
 ```
 
 ### 증거 화면
@@ -270,9 +271,9 @@ idx_performance_enrollments_course_status
 
 각 인덱스의 이유를 먼저 작성합니다.
 
-| 후보 인덱스 | 대응 조회 패턴 | 예상 이점 | 컬럼 순서 이유 | 예상 비용/단점 |
+| 후보 인덱스 | 대응 조회 패턴 | 예상 이점 | 컬럼 순서 이유 ㅇ| 예상 비용/단점 |
 | --- | --- | --- | --- | --- |
-| `idx_performance_courses_title` |  |  |  |  |
+| `idx_performance_courses_title` | WHERE title = ?	 |  |  |  |
 | `idx_performance_enrollments_student_id` |  |  |  |  |
 | `idx_performance_enrollments_course_status` |  |  |  |  |
 
