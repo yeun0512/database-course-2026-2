@@ -135,7 +135,7 @@ code/chapter10/02_performance_lab_seed.sql
 assignments/chapter10/images/step03_data_scale.png
 ```
 
-`여기에 데이터 규모 확인 화면을 삽입하세요.`
+<img width="922" height="760" alt="image" src="https://github.com/user-attachments/assets/05f5982c-7151-465d-b5e5-98b95b2762d1" />
 
 ---
 
@@ -170,14 +170,14 @@ WHERE email = 'performance5000@example.com';
 
 | 관찰 항목 | 기록 |
 | --- | --- |
-| 주요 Scan/계획 노드 |  |
+| 주요 Scan/계획 노드 | Index Scan using uq_performance_students_email on students|
 | estimated rows | 1 |
 | actual rows | 1 |
-| Filter |  |
-| Index Cond |  |
-| Buffers hit/read |  |
-| Planning Time |  |
-| Execution Time |  |
+| Filter | 없음 |
+| Index Cond | (email)::text = 'performance5000@example.com'::text |
+| Buffers hit/read | 3/0 |
+| Planning Time | 0.067 ms |
+| Execution Time | 0.043 ms |
 
 ## Query B
 
@@ -187,28 +187,17 @@ WHERE / JOIN / ORDER BY / LIMIT: WHERE e.student_id = 5000; students와 courses�
 예상 반환 행 수: 10
 실제 반환 행 수: 10
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT
-    e.id,
-    s.name AS student_name,
-    c.title AS course_title,
-    e.status,
-    e.recorded_amount
-FROM performance_lab.enrollments AS e
-JOIN performance_lab.students AS s ON s.id = e.student_id
-JOIN performance_lab.courses AS c ON c.id = e.course_id
-WHERE e.student_id = 5000;
 ```
 
 | 관찰 항목 | 기록 |
 | --- | --- |
-| 주요 Scan/계획 노드 |  |
-| estimated rows | 30001 |
-| actual rows | 30001 |
-| Filter |  |
-| Index Cond |  |
-| Buffers hit/read |  |
-| Execution Time |  |
+| 주요 Scan/계획 노드 | 	최상위 Nested Loop; enrollments는 Seq Scan, students와 courses는 Index Scan |
+| estimated rows | 10 |
+| actual rows | 10 |
+| Filter | enrollments에서 student_id = 5000 |
+| Index Cond | students: id = 5000; courses: id = e.course_id. enrollments에는 Index Cond 없음 |
+| Buffers hit/read | 769/0 |
+| Execution Time | 5.924 ms |
 
 ## Query C
 
@@ -218,21 +207,17 @@ WHERE / JOIN / ORDER BY / LIMIT: WHERE status = '수강중'
 예상 반환 행 수: 30001
 실제 반환 행 수: 30001
 
-EXPLAIN (ANALYZE, BUFFERS)
-SELECT id, student_id, course_id, status
-FROM performance_lab.enrollments
-WHERE status = '수강중';
 ```
 
 | 관찰 항목 | 기록 |
 | --- | --- |
-| 주요 Scan/계획 노드 |  |
-| estimated rows | 10 |
-| actual rows | 10 |
-| Filter |  |
-| Index Cond |  |
-| Buffers hit/read |  |
-| Execution Time |  |
+| 주요 Scan/계획 노드 | Seq Scan on enrollments |
+| estimated rows | 30,001 |
+| actual rows | 30,001 |
+| Filter | (status)::text = '수강중'::text |
+| Index Cond | 없음 |
+| Buffers hit/read | 736/0 |
+| Execution Time | 10.589 ms |
 
 ### `cost`와 실제 실행 시간이 같은 개념이 아닌 이유
 
@@ -255,7 +240,7 @@ EXPLAIN와 EXPLAIN (ANALYZE, BUFFERS)의 차이가 있음에 주목해야하기 
 assignments/chapter10/images/step04_before_plan.png
 ```
 
-`여기에 대표 기준 실행 계획을 삽입하세요.`
+<img width="1234" height="702" alt="image" src="https://github.com/user-attachments/assets/57faf362-1928-40d9-b638-615255d895d7" />
 
 ---
 
